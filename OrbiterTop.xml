@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ship version="1" liftedOff="0" touchingGround="0">
+  <Parts>
+    <Part partType="pod-1" id="1" x="0.000000" y="-1.250000" angle="0.000000" angleV="0.000000" editorAngle="0">
+      <Pod throttle="0.000000" name="">
+        <Staging currentStage="0">
+          <Step>
+            <Activate Id="26" moved="1" />
+          </Step>
+        </Staging>
+      </Pod>
+    </Part>
+    <Part partType="fuselage-1" id="54" x="0.000000" y="-3.000000" angle="0.000000" angleV="0.000000" editorAngle="0" activated="0" exploded="0" flippedX="0" flippedY="0" />
+    <Part partType="rcs-1" id="9" x="-1.250000" y="-2.750000" angle="0.000000" angleV="0.000000" editorAngle="0" activated="0" exploded="0" flippedX="1" flippedY="0" />
+    <Part partType="fueltank-4" id="28" x="0.000000" y="-4.500000" angle="3.141593" angleV="0.000000" editorAngle="2">
+      <Tank fuel="750.000000" />
+    </Part>
+    <Part partType="fueltank-4" id="62" x="0.000000" y="-5.500000" angle="0.000000" angleV="0.000000" editorAngle="0">
+      <Tank fuel="750.000000" />
+    </Part>
+    <Part partType="fueltank-5" id="57" x="1.250000" y="-5.750000" angle="0.000000" angleV="0.000000" editorAngle="0">
+      <Tank fuel="275.000000" />
+    </Part>
+    <Part partType="fueltank-5" id="58" x="-1.250000" y="-5.750000" angle="0.000000" angleV="0.000000" editorAngle="0">
+      <Tank fuel="275.000000" />
+    </Part>
+    <Part partType="fueltank-1" id="56" x="0.000000" y="-7.000000" angle="0.000000" angleV="0.000000" editorAngle="0">
+      <Tank fuel="1500.000000" />
+    </Part>
+    <Part partType="engine-1" id="26" x="0.000000" y="-9.000000" angle="0.000000" angleV="0.000000" editorAngle="0" activated="0" exploded="0" flippedX="0" flippedY="0" />
+    <Part partType="rcs-1" id="59" x="-1.250000" y="-7.250000" angle="0.000000" angleV="0.000000" editorAngle="0" activated="0" exploded="0" flippedX="1" flippedY="0" />
+    <Part partType="rcs-1" id="60" x="1.250000" y="-7.250000" angle="0.000000" angleV="0.000000" editorAngle="0" activated="0" exploded="0" flippedX="0" flippedY="0" />
+    <Part partType="rcs-1" id="13" x="1.250000" y="-2.750000" angle="0.000000" angleV="0.000000" editorAngle="0" activated="0" exploded="0" flippedX="0" flippedY="0" />
+    <Part partType="dock-1" id="10" x="0.000000" y="-0.250000" angle="0.000000" angleV="0.000000" editorAngle="0" activated="0" exploded="0" flippedX="0" flippedY="0" />
+  </Parts>
+  <Connections>
+    <Connection parentAttachPoint="2" childAttachPoint="1" parentPart="1" childPart="54" />
+    <Connection parentAttachPoint="3" childAttachPoint="1" parentPart="54" childPart="9" />
+    <Connection parentAttachPoint="2" childAttachPoint="2" parentPart="54" childPart="28" />
+    <Connection parentAttachPoint="1" childAttachPoint="1" parentPart="28" childPart="62" />
+    <Connection parentAttachPoint="4" childAttachPoint="2" parentPart="62" childPart="57" />
+    <Connection parentAttachPoint="3" childAttachPoint="1" parentPart="62" childPart="58" />
+    <Connection parentAttachPoint="2" childAttachPoint="1" parentPart="62" childPart="56" />
+    <Connection parentAttachPoint="2" childAttachPoint="1" parentPart="56" childPart="26" />
+    <Connection parentAttachPoint="3" childAttachPoint="1" parentPart="56" childPart="59" />
+    <Connection parentAttachPoint="4" childAttachPoint="2" parentPart="56" childPart="60" />
+    <Connection parentAttachPoint="4" childAttachPoint="2" parentPart="54" childPart="13" />
+    <Connection parentAttachPoint="1" childAttachPoint="1" parentPart="1" childPart="10" />
+  </Connections>
+</Ship>
