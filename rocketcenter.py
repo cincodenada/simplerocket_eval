@@ -2,6 +2,7 @@ from bottle import route, run, template, view
 import requests
 import xml.etree.ElementTree as ET
 import json
+from polyfunc import SimplePoly
 
 ship_url = 'http://jundroo.com/service/SimpleRockets/DownloadRocket?id=%d'
 
@@ -41,7 +42,11 @@ class ShipPart:
         self.elem = element
 
     def get_centroid(self):
-        return (float(self.elem.get('width'))/2,float(self.elem.get('height'))/2)
+        if(self.is_poly()):
+            poly = SimplePoly(self.get_shape())
+            return poly.centroid()
+        else:
+            return (float(self.elem.get('width'))/2,float(self.elem.get('height'))/2)
     
     def get_mass(self):
         return float(self.elem.get('mass'))
@@ -56,6 +61,9 @@ class ShipPart:
             return 0
         else:
             return float(tank.get('fuel'))*fuel_mass_per_liter
+
+    def is_poly(self):
+        return (self.elem.find('Shape') is None)
 
     def get_shape(self):
         shape = self.elem.find('Shape')
