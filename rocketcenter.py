@@ -78,7 +78,7 @@ class ShipPart:
         else:
             return tuple(
                 (float(v.get('x')),float(v.get('y')))
-                for vert in shape.findall('./Vertex')
+                for v in shape.findall('./Vertex')
             )
 
 
