@@ -46,7 +46,7 @@ class ShipPart:
             poly = SimplePoly(self.get_shape())
             return poly.centroid()
         else:
-            return (float(self.elem.get('width'))/2,float(self.elem.get('height'))/2)
+            return (0,0)
     
     def get_mass(self):
         return float(self.elem.get('mass'))
@@ -63,7 +63,7 @@ class ShipPart:
             return float(tank.get('fuel'))*fuel_mass_per_liter
 
     def is_poly(self):
-        return (self.elem.find('Shape') is None)
+        return (self.elem.find('Shape') is not None)
 
     def get_shape(self):
         shape = self.elem.find('Shape')
