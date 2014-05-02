@@ -38,15 +38,20 @@ class PartInstance:
 
 
 class ShipPart:
+    centroid = None
+
     def __init__(self, element):
         self.elem = element
 
     def get_centroid(self):
-        if(self.is_poly()):
-            poly = SimplePoly(self.get_shape())
-            return poly.centroid()
+        if(self.centroid is not None):
+            return self.centroid
         else:
-            return (0,0)
+            if(self.is_poly()):
+                poly = SimplePoly(self.get_shape())
+                return poly.centroid()
+            else:
+                return (0,0)
     
     def get_mass(self):
         return float(self.elem.get('mass'))
@@ -100,4 +105,4 @@ parts_xml.parse('PartList.xml')
 for part in parts_xml.findall('./*'):
     part_dict[part.get('id')] = ShipPart(part)
 
-run(host='localhost',port=54321)
+run(host='localhost',port=54321,reloader=True)
