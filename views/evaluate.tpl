@@ -46,6 +46,7 @@ $(document).ready(function() {
 
     rocket = new Rocket(rocketdata, ctx);
     rocket.draw();
+    rocket.draw_centroid();
 
     slidermax = 10000;
     $('#fuelslider').slider({
@@ -53,20 +54,32 @@ $(document).ready(function() {
         max: slidermax,
         value: slidermax,
         slide: function(evt, ui) {
-            rocket.fuel_level = ui.value/slidermax;
+            curidx = $(this).data('cur_engine');
+            if(curidx == undefined) { curidx = 0; }
+            rocket.set_fuel(curidx, ui.value/slidermax);
             rocket.draw();
+            ctx.fillStyle = "goldenrod";
+            ctx.lineWidth = 0.2;
+            rocket.draw_part(curidx);
+            rocket.draw_centroid();
         }
     });
 
     $(canvelm).on('click',function(evt) {
-        part = rocket.getClosestPart(evt);
+        idx = rocket.getClosestPart(evt);
+        
         ctx.strokeStyle = "black";
         ctx.lineWidth = 0.1;
         ctx.fillStyle = "white";
         rocket.draw();
         ctx.fillStyle = "goldenrod";
         ctx.lineWidth = 0.2;
-        rocket.draw_part(part);
+        rocket.draw_part(idx);
+        rocket.draw_centroid();
+
+        $('#fuelslider')
+            .slider('value',rocket.get_fuel(idx)*slidermax)
+            .data('cur_engine',idx);
     });
 });
 </script>

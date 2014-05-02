@@ -1,7 +1,7 @@
 function Rocket(partslist, dc) {
     this.partslist = partslist;
-    this.fuel_level = 1;
     this.dc = dc;
+    this.engine_fuel = [1];
 }
 
 //Draw rocket
@@ -11,14 +11,14 @@ Rocket.prototype.draw = function() {
         //Draw part
         me.dc.strokeStyle = "black";
         me.dc.fillStyle = "white";
-        me.draw_part(part, true);
+        me.draw_part(idx, true);
     });
-
-    this.draw_centroid();
 }
 
-Rocket.prototype.draw_part = function(part, with_centroid) {
+Rocket.prototype.draw_part = function(idx, with_centroid) {
     if(typeof with_centroid == "undefined") { with_centroid = true; }
+    part = this.partslist[idx];
+
     this.dc.beginPath()
     startpoint = this.part_abs(part, 'shape', 0);
     this.dc.moveTo(startpoint[0], startpoint[1]);
@@ -36,12 +36,28 @@ Rocket.prototype.draw_part = function(part, with_centroid) {
 
         //Draw part centroid
         centroid = this.part_abs(part, 'centroid');
-        adj_mass = part.mass - part.fuel_mass*(1-this.fuel_level);
+        adj_mass = part.mass - part.fuel_mass*(1-this.get_fuel(idx));
         this.dc.arc(
             centroid[0],centroid[1],
             0.25*adj_mass,0,Math.PI*2,false
         );
         this.dc.fill();
+    }
+}
+
+Rocket.prototype.get_fuel = function(idx) {
+    if(this.engine_fuel[idx] == undefined) {
+        return this.engine_fuel[0];
+    } else {
+        return this.engine_fuel[idx];
+    }
+}
+
+Rocket.prototype.set_fuel = function(idx, value) {
+    if(idx == 0) {
+        this.engine_fuel = [value];
+    } else {
+        this.engine_fuel[idx] = value;
     }
 }
 
@@ -52,7 +68,7 @@ Rocket.prototype.draw_centroid = function() {
     $.each(this.partslist, function(idx, part) {
         centroid = me.part_abs(part, 'centroid');
 
-        adj_mass = part.mass - part.fuel_mass*(1-me.fuel_level);
+        adj_mass = part.mass - part.fuel_mass*(1-me.get_fuel(idx));
 
         avgcentroid[0] += centroid[0]*adj_mass;
         avgcentroid[1] += centroid[1]*adj_mass;
@@ -106,5 +122,5 @@ Rocket.prototype.getClosestPart = function(mouseevt) {
         }
     });
 
-    return this.partslist[minidx];
+    return minidx;
 }
