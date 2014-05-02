@@ -32,7 +32,7 @@ class Ship:
         return self.parseFile(ET.parse(xmlfile));
 
     def loadRemoteShip(self, shipid):
-        shipfile = requests.get(ship_url % (int(rocket_id)))
+        shipfile = requests.get(ship_url % (int(shipid)))
         #TODO: Perhaps .parse() with ship.raw?
         return self.parseFile(ET.fromstring(shipfile.text))
 

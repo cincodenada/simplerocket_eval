@@ -10,7 +10,7 @@ Rocket.prototype.draw = function() {
     $.each(this.partslist, function(idx, part) {
         //Draw part
         me.dc.strokeStyle = "black";
-        me.dc.fillStyle = "white";
+        me.dc.fillStyle = "silver";
         me.draw_part(idx, true);
     });
 }
