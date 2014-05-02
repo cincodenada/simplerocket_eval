@@ -13,22 +13,45 @@ height: 90%;
 </style>
 </head>
 <body>
-Rocket {{rocket_id}}:
+Rocket {{rocket_id}}:<br/>
+<div id="fuelslider"></div>
 <canvas id="rocketview" width="100" height="50">
 </canvas>
 <script type="text/javascript">
-//Set up canvas
-var canvelm = document.getElementById('rocketview');
-var ctx = canvelm.getContext("2d");
-var scale = 10;
-ctx.canvas.width = canvelm.clientWidth;
-ctx.canvas.height = canvelm.clientHeight;
-ctx.translate(ctx.canvas.width/2,ctx.canvas.height/2);
-ctx.scale(scale,-scale);
-ctx.lineWidth = 0.1;
+$(document).ready(function() {
+    //Set up canvas
+    var canvelm = document.getElementById('rocketview');
+    var ctx = canvelm.getContext("2d");
+    var scale = 10;
+    ctx.canvas.width = canvelm.clientWidth;
+    ctx.canvas.height = canvelm.clientHeight;
+    ctx.translate(ctx.canvas.width/2,ctx.canvas.height/2);
+    ctx.scale(scale,-scale);
+    ctx.lineWidth = 0.1;
 
-rocket = new Rocket();
-rocket.draw();
+    CanvasRenderingContext2D.prototype.drawX = function(x,y,hairsize) {
+        this.beginPath()
+        this.moveTo(x-hairsize,y-hairsize);
+        this.lineTo(x+hairsize,y+hairsize);
+        this.moveTo(x-hairsize,y+hairsize);
+        this.lineTo(x+hairsize,y-hairsize);
+        this.stroke();
+    }
+
+    rocket = new Rocket(rocketdata, ctx);
+    rocket.draw();
+
+    $(canvelm).on('click',function(evt) {
+        part = rocket.getClosestPart(evt);
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 0.1;
+        ctx.fillStyle = "white";
+        rocket.draw();
+        ctx.fillStyle = "green";
+        ctx.lineWidth = 0.2;
+        rocket.draw_part(part);
+    });
+});
 </script>
 </body>
 </html>
