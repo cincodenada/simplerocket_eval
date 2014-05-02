@@ -5,10 +5,16 @@
 var rocketdata = {{!json.dumps(rocket_data)}};
 </script>
 <script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="//code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/dark-hive/jquery-ui.css"/>
 <script type="text/javascript" src="/js/rocket.js"></script>
 <style>
 #rocketview {
-height: 90%;
+    height: 90%;
+}
+body {
+    background: black;
+    color: white;
 }
 </style>
 </head>
@@ -41,13 +47,24 @@ $(document).ready(function() {
     rocket = new Rocket(rocketdata, ctx);
     rocket.draw();
 
+    slidermax = 10000;
+    $('#fuelslider').slider({
+        min: 0,
+        max: slidermax,
+        value: slidermax,
+        slide: function(evt, ui) {
+            rocket.fuel_level = ui.value/slidermax;
+            rocket.draw();
+        }
+    });
+
     $(canvelm).on('click',function(evt) {
         part = rocket.getClosestPart(evt);
         ctx.strokeStyle = "black";
         ctx.lineWidth = 0.1;
         ctx.fillStyle = "white";
         rocket.draw();
-        ctx.fillStyle = "green";
+        ctx.fillStyle = "goldenrod";
         ctx.lineWidth = 0.2;
         rocket.draw_part(part);
     });

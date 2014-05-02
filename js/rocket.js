@@ -11,24 +11,14 @@ Rocket.prototype.draw = function() {
         //Draw part
         me.dc.strokeStyle = "black";
         me.dc.fillStyle = "white";
-        me.draw_part(part);
-
-        me.dc.fillStyle = "red";
-        me.dc.beginPath()
-
-        //Draw part centroid
-        centroid = me.part_abs(part, 'centroid');
-        me.dc.arc(
-            centroid[0],centroid[1],
-            0.25*part.mass,0,Math.PI*2,false
-        );
-        me.dc.fill();
+        me.draw_part(part, true);
     });
 
     this.draw_centroid();
 }
 
-Rocket.prototype.draw_part = function(part) {
+Rocket.prototype.draw_part = function(part, with_centroid) {
+    if(typeof with_centroid == "undefined") { with_centroid = true; }
     this.dc.beginPath()
     startpoint = this.part_abs(part, 'shape', 0);
     this.dc.moveTo(startpoint[0], startpoint[1]);
@@ -38,6 +28,21 @@ Rocket.prototype.draw_part = function(part) {
     }
     this.dc.closePath();
     this.dc.stroke();
+    this.dc.fill();
+
+    if(with_centroid) {
+        this.dc.fillStyle = "red";
+        this.dc.beginPath()
+
+        //Draw part centroid
+        centroid = this.part_abs(part, 'centroid');
+        adj_mass = part.mass - part.fuel_mass*(1-this.fuel_level);
+        this.dc.arc(
+            centroid[0],centroid[1],
+            0.25*adj_mass,0,Math.PI*2,false
+        );
+        this.dc.fill();
+    }
 }
 
 Rocket.prototype.draw_centroid = function() {
