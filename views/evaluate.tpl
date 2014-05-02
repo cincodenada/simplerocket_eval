@@ -13,7 +13,7 @@ var rocketdata = {{!json.dumps(rocket_data)}};
     height: 90%;
 }
 body {
-    background: black;
+    background: #111 url('/img/stars_tile.jpg');
     color: white;
 }
 </style>
