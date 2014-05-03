@@ -29,11 +29,7 @@ $(document).ready(function() {
         max: slidermax,
         value: slidermax,
         slide: function(evt, ui) {
-            curidx = $(this).data('cur_engine');
-            if(curidx == undefined) { curidx = 0; }
-            rocket.set_fuel(curidx, ui.value/slidermax);
-            rocket.set_selected(curidx);
-
+            rocket.set_fuel(ui.value/slidermax);
             render();
         }
     });

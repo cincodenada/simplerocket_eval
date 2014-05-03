@@ -6,7 +6,7 @@ function Rocket(partslist, stagedata, dc) {
     this.stagedata = stagedata;
     this.dc = dc;
     this.engine_fuel = [1];
-    this.selpart = {};
+    this.selpart = [];
     this.curstage = 0;
 
     //Build parts list
@@ -37,12 +37,15 @@ Rocket.prototype.get_fuel = function(idx) {
     }
 }
 
-Rocket.prototype.set_fuel = function(idx, value) {
-    if(idx == 0) {
-        this.engine_fuel = [value];
-    } else {
-        this.engine_fuel[idx] = value;
-    }
+Rocket.prototype.set_fuel = function(value) {
+	anysel = false;
+	for(i=0;i<this.selpart.length;i++) {
+		if(this.selpart[i]) {
+			this.engine_fuel[i] = value;
+			anysel = true;
+		}
+	}
+	if(!anysel) { this.engine_fuel = [value]; }
     //Clear cached centroid
     this.centroid = false;
 }
@@ -87,7 +90,7 @@ Rocket.prototype.getClosestPart = function(mouseevt, maxdist) {
 
     mindist = 999999;
     minidx = null;
-    $.each(this.partslist, function(idx, part) {
+    $.each(this.parts, function(idx, part) {
         point = part.get_abs('centroid');
         dist = Math.sqrt(
             Math.pow(point[0] - x,2) +
@@ -119,7 +122,7 @@ Rocket.prototype.toggle_selected = function(idx) {
 }
 
 Rocket.prototype.set_selected = function(idx) {
-    this.selpart = {};
+    this.selpart = [];
     this.selpart[idx] = true;
 }
 
@@ -210,6 +213,28 @@ Part.prototype.draw = function(with_centroid) {
     this.dc.closePath();
     this.dc.stroke();
     this.dc.fill();
+
+	if(this.data.type == 'tank') {
+        this.dc.fillStyle = "gray";
+		fuel_height = (this.data.size[1] * this.get_fuel())
+		this.dc.fillRect(
+			-this.data.size[0]/2,
+			-this.data.size[1]/2,
+			this.data.size[0],
+			fuel_height
+		);
+		/*
+		this.dc.clip();
+        this.dc.fillStyle = "green";
+        this.dc.lineWidth = 0;
+		this.dc.fillRect(
+			this.get('x')-this.data.size[0]/2,
+			this.get('y')-this.data.size[1]/2,
+			this.data.size[0],
+			this.data.size[1]
+		);
+		*/
+	}
 
     if(with_centroid) {
         this.draw_centroid()
