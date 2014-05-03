@@ -23,6 +23,11 @@ $(document).ready(function() {
     var ctx = canvelm.getContext("2d");
     ctx.canvas.width = canvelm.clientWidth;
     ctx.canvas.height = canvelm.clientHeight;
+
+    //Prevent the browser resizing the canvas...
+    ctx.canvas.style.width = ctx.canvas.width;
+    ctx.canvas.style.height = ctx.canvas.height;
+
     ctx.gt().translate(ctx.canvas.width/2,ctx.canvas.height/2);
     ctx.gt().scale(scale,-scale);
     ctx.lineWidth = 0.1;

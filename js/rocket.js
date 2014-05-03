@@ -39,13 +39,16 @@ Rocket.prototype.get_fuel = function(idx) {
 
 Rocket.prototype.set_fuel = function(value) {
 	anysel = false;
-	for(i=0;i<this.selpart.length;i++) {
-		if(this.selpart[i]) {
-			this.engine_fuel[i] = value;
-			anysel = true;
+	if(this.selpart.length == 1) { this.engine_fuel = [value]; }
+	else {
+		for(i=0;i<this.selpart.length;i++) {
+			if(this.selpart[i]) {
+				this.engine_fuel[i] = value;
+				anysel = true;
+			}
 		}
+		if(!anysel) { this.engine_fuel = [value]; }
 	}
-	if(!anysel) { this.engine_fuel = [value]; }
     //Clear cached centroid
     this.centroid = false;
 }
@@ -82,8 +85,7 @@ Rocket.prototype.getClosestPart = function(mouseevt, maxdist) {
     var x = mouseevt.pageX - this.dc.canvas.offsetLeft;
     var y = mouseevt.pageY - this.dc.canvas.offsetTop;
 
-    x = (x - this.dc.canvas.clientWidth/2)/10;
-    y = -(y - this.dc.canvas.clientHeight/2)/10;
+    clicked = me.dc.gt().detransformPoint(x, y);
 
     //Debug
     //this.dc.drawX(x,y,0.75);
@@ -93,8 +95,8 @@ Rocket.prototype.getClosestPart = function(mouseevt, maxdist) {
     $.each(this.parts, function(idx, part) {
         point = part.get_abs('centroid');
         dist = Math.sqrt(
-            Math.pow(point[0] - x,2) +
-            Math.pow(point[1] - y,2)
+            Math.pow(point[0] - clicked.x,2) +
+            Math.pow(point[1] - clicked.y,2)
         );
         if(dist < mindist) {
             mindist = dist;
