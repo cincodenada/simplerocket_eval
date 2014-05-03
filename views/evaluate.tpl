@@ -35,12 +35,24 @@ h2 { margin-top: 0px; }
     padding: 10px;
     color: #333;
     max-width: 350px;
+    overflow: hidden;
 }
 #tips li {
     margin: 5px 0px;
 }
 #tips.closed {
     height: 10px;
+}
+#zoom {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    text-align: center;
+    width: 100%;
+}
+#zoom button {
+    font-size: 150%;
+    font-weight: bold;
 }
 .closebtn {
     border-top: 10px solid black;
@@ -72,6 +84,10 @@ Fuel level:
 </header>
 <canvas id="rocketview" width="100" height="50">
 </canvas>
+<div id="zoom">
+<button value="+">+</button>
+<button value="-">–</button>
+</div>
 <div id="tips">
 <a href="#" class="closebtn"></a>
 <h2>Tips:</h2>
@@ -84,78 +100,6 @@ Fuel level:
 Built by <a href="http://portfolio.cincodenada.com/">Joel Bradshaw</a> aka <a href="http://www.reddit.com/user/cincodenada">cincodenada</a>
 </div>
 <a href="https://github.com/cincodenada/simplerocket_eval"><img style="position: absolute; bottom: -50; left: -50; border: 0;" src="https://camo.githubusercontent.com/52760788cde945287fbb584134c4cbc2bc36f904/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f77686974655f6666666666662e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png"></a>
-<script type="text/javascript">
-$(document).ready(function() {
-    //Set up canvas
-    var canvelm = document.getElementById('rocketview');
-    var ctx = canvelm.getContext("2d");
-    var scale = 10;
-    ctx.canvas.width = canvelm.clientWidth;
-    ctx.canvas.height = canvelm.clientHeight;
-    ctx.translate(ctx.canvas.width/2,ctx.canvas.height/2);
-    ctx.scale(scale,-scale);
-    ctx.lineWidth = 0.1;
-
-    CanvasRenderingContext2D.prototype.drawX = function(x,y,hairsize) {
-        this.beginPath()
-        this.moveTo(x-hairsize,y-hairsize);
-        this.lineTo(x+hairsize,y+hairsize);
-        this.moveTo(x-hairsize,y+hairsize);
-        this.lineTo(x+hairsize,y-hairsize);
-        this.stroke();
-    }
-
-    rocket = new Rocket(rocketdata, ctx);
-    rocket.draw();
-    rocket.draw_centroid();
-
-    slidermax = 10000;
-    $('#fuelslider').slider({
-        min: 0,
-        max: slidermax,
-        value: slidermax,
-        slide: function(evt, ui) {
-            curidx = $(this).data('cur_engine');
-            if(curidx == undefined) { curidx = 0; }
-            rocket.set_fuel(curidx, ui.value/slidermax);
-            rocket.draw();
-            ctx.fillStyle = "goldenrod";
-            ctx.lineWidth = 0.2;
-            rocket.draw_part(curidx);
-            rocket.draw_centroid();
-        }
-    });
-
-    $(canvelm).on('click',function(evt) {
-        idx = rocket.getClosestPart(evt);
-        
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 0.1;
-        ctx.fillStyle = "silver";
-        rocket.draw();
-        ctx.fillStyle = "goldenrod";
-        ctx.lineWidth = 0.2;
-        rocket.draw_part(idx);
-        rocket.draw_centroid();
-
-        $('#fuelslider')
-            .slider('value',rocket.get_fuel(idx)*slidermax)
-            .data('cur_engine',idx);
-    });
-
-    $('#load_button').click(function() {
-        var endnums = /\d+$/;
-        var shipurl = $('#load_rocket').val()
-        var rocket_id = endnums.exec(shipurl);
-        window.location.href = '/evaluate/' + rocket_id[0];
-    });
-
-    $('.closebtn').on('click',function(evt) {
-        evt.preventDefault();
-        evt.stopPropagation(); 
-        $(this).parent().toggleClass('closed');
-    })
-});
-</script>
+<script type="text/javascript" src="/js/evaluate.js"></script>
 </body>
 </html>
