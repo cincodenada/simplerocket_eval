@@ -20,7 +20,7 @@ $(document).ready(function() {
         this.stroke();
     }
 
-    rocket = new Rocket(rocketdata, ctx);
+    rocket = new Rocket(rocketdata, stagedata, ctx);
     rocket.draw();
     rocket.draw_centroid();
 
@@ -65,7 +65,6 @@ $(document).ready(function() {
             (evt.pageX - this.offsetLeft)/scale,
             (evt.pageY - this.offsetTop)/scale
         ];
-        console.log(canvaspoint);
         zoom(scalestep*evt.deltaY, canvaspoint);
         evt.preventDefault();
     });

@@ -38,10 +38,97 @@ class Ship:
 
     def parseFile(self, tree):
         self.partlist = []
+        self.tree = tree
         parts = tree.findall('./Parts/Part')
         for p in parts:
             newpart = PartInstance(p, self)
             self.partlist.append(newpart.get_dict())
+        self.stage_parts = self.findStages()
+
+    def findStages(self):
+        steps = self.tree.findall("./Parts/Part/Pod/Staging/Step")
+        stages = []
+        for s in steps:
+            cur_detachers = []
+            for part in s.findall("./Activate"):
+                relpart = self.tree.find("./Parts/Part[@id='%s']" % (part.get('Id')))
+                nameparts = relpart.get('partType').split('-',2)
+                if(nameparts[0] == 'detacher'):
+                    cur_detachers.append(relpart.get('id'))
+            if(len(cur_detachers)):
+                stages.append(cur_detachers)
+
+        self.detacher_list = []
+        for s in range(len(stages)):
+            good = []
+            bad = []
+            for subs in range(len(stages)):
+                if(subs < s):
+                    good.extend(stages[subs])
+                else:
+                    bad.extend(stages[subs])
+            self.detacher_list.append([good,bad])
+
+        curstage = 0
+        pod_id = self.tree.find("./Parts/Part[@partType='pod-1']").get('id')
+        stage_parts = []
+        pod_parts = []
+        for s in stages:
+            print "Next stage..."
+            cur_parts = []
+            for d in s:
+                parent = self.tree.find("./Connections/Connection[@childPart='%s']" % (d))
+                child = self.tree.find("./Connections/Connection[@parentPart='%s']" % (d))
+                sides = [
+                    self.getCurrentStage(parent.get('parentPart'), [], d, curstage,0),
+                    self.getCurrentStage(child.get('childPart'), [], d, curstage,0)
+                ]
+                if(sides[0] and sides[1]):
+                    if(pod_id in sides[0]):
+                        pod_parts.extend(sides[0])
+                        cur_parts.extend(sides[1])
+                    elif(pod_id in sides[1]):
+                        pod_parts.extend(sides[1])
+                        cur_parts.extend(sides[0])
+                else:
+                    cur_parts.extend(sides[0] if sides[0] else sides[1])
+            stage_parts.append(list(set(cur_parts)))
+            curstage += 1
+
+        stage_parts.append(list(set(pod_parts)))
+
+        return stage_parts
+
+    def getCurrentStage(self, from_id, part_pool, cur_detacher, curstage, depth):
+        if(depth > 50):
+            return False
+
+        parents = self.tree.findall("./Connections/Connection[@childPart='%s']" % (from_id))
+        parent_ids = [p.get('parentPart') for p in parents]
+        children = self.tree.findall("./Connections/Connection[@parentPart='%s']" % (from_id))
+        child_ids = [c.get('childPart') for c in children]
+
+        part_pool.append(from_id)
+        #print " "*depth + "Found parts connected to %s..." % (from_id)
+        for connected in (parent_ids + child_ids):
+            if((connected in part_pool) or (connected == cur_detacher)):
+                #print " "*depth + "Already dealt with part %s" % (connected)
+                continue
+            elif(connected in self.detacher_list[curstage][0]):
+                #print " "*depth + "Part %s is previous connector, ignoring" % (connected)
+                continue
+            elif(connected in self.detacher_list[curstage][1]):
+                #print " "*depth + "Part %s is new connector, collapsing!" % (connected)
+                return False
+            else:
+                #print " "*depth + "Part %s looks good, adding..." % (connected)
+                new_parts = self.getCurrentStage(connected, part_pool, cur_detacher, curstage, depth+1)
+                if(new_parts):
+                    part_pool.extend(new_parts)
+                else:
+                    return False
+
+        return part_pool
 
 class PartInstance:
     def __init__(self, element, ship):
@@ -53,7 +140,7 @@ class PartInstance:
         retdict = self.part.get_dict()
         retdict.update({k: float(v)
             for k, v in self.elem.attrib.iteritems()
-            if k in ('x','y','editorAngle')
+            if k in ('x','y','editorAngle','id')
         })
         return retdict
 
@@ -118,6 +205,7 @@ class ShipPart:
             'mass': self.get_mass(),
             'fuel_mass': self.get_fuel_mass(),
             'size': self.get_size(),
-            'shape': self.get_shape()
+            'shape': self.get_shape(),
+            'type': self.elem.get('type'),
         }
 

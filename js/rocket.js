@@ -1,8 +1,10 @@
-function Rocket(partslist, dc) {
+function Rocket(partslist, stagedata, dc) {
     this.partslist = partslist;
+    this.stagedata = stagedata;
     this.dc = dc;
     this.engine_fuel = [1];
-    this.selpart = null;
+    this.selpart = {};
+    this.curstage = 2;
 }
 
 //Draw rocket
@@ -18,15 +20,31 @@ Rocket.prototype.draw = function() {
     });
 }
 
+Rocket.prototype.is_active = function(idx) {
+    if(this.curstage == null) {
+        return true;
+    } else {
+        included = false;
+        for(c=0;c < stagedata[this.curstage].length;c++) {
+            if(stagedata[this.curstage][c] == this.partslist[idx].id) {
+                included = true;
+            }
+        }
+        return included;
+    }
+}
+
 Rocket.prototype.draw_part = function(idx, with_centroid) {
     if(typeof with_centroid == "undefined") { with_centroid = true; }
+
     part = this.partslist[idx];
+    if(!this.is_active(idx)) { return false; } 
 
     this.dc.save();
     this.dc.translate(part.x*2,part.y*2);
     this.dc.rotate(part.editorAngle*Math.PI/2);
     //If selected, make selected style
-    if(this.selpart == idx) {
+    if(this.selpart[idx]) {
         this.dc.fillStyle = "goldenrod";
         this.dc.lineWidth = 0.2;
     }
@@ -80,14 +98,16 @@ Rocket.prototype.draw_centroid = function() {
         avgcentroid = [0,0];
         total_mass = 0;
         $.each(this.partslist, function(idx, part) {
-            centroid = me.part_abs(part, 'centroid');
+            if(me.is_active(idx)) {
+                centroid = me.part_abs(part, 'centroid');
 
-            adj_mass = part.mass - part.fuel_mass*(1-me.get_fuel(idx));
+                adj_mass = part.mass - part.fuel_mass*(1-me.get_fuel(idx));
 
-            avgcentroid[0] += centroid[0]*adj_mass;
-            avgcentroid[1] += centroid[1]*adj_mass;
+                avgcentroid[0] += centroid[0]*adj_mass;
+                avgcentroid[1] += centroid[1]*adj_mass;
 
-            total_mass += adj_mass;
+                total_mass += adj_mass;
+            }
         });
         avgcentroid[0] = avgcentroid[0]/total_mass;
         avgcentroid[1] = avgcentroid[1]/total_mass;
@@ -144,6 +164,11 @@ Rocket.prototype.getClosestPart = function(mouseevt, maxdist) {
     }
 }
 
+Rocket.prototype.add_selected = function(idx) {
+    this.selpart[idx] = true;
+}
+
 Rocket.prototype.set_selected = function(idx) {
-    this.selpart = idx;
+    this.selpart = {};
+    this.selpart[idx] = true;
 }
