@@ -26,7 +26,7 @@ function Transform(context) {
     
     this.setMatrix = function(m) {
         this.matrix = [m[0],m[1],m[2],m[3],m[4],m[5]];
-        this.setTransform();
+        this.applyTransform();
     };
     
     this.cloneMatrix = function(m) {
@@ -57,7 +57,7 @@ function Transform(context) {
     // Matrix
     //==========================================
 
-    this.setTransform = function() {
+    this.applyTransform = function() {
         if (this.context) {
             this.context.setTransform(
                 this.matrix[0],
@@ -69,13 +69,24 @@ function Transform(context) {
             );
         }
     };
+
+    this.setTransform = function(a, b, c, d, e, f) {
+        this.matrix[0] = a;
+        this.matrix[1] = b;
+        this.matrix[2] = c;
+        this.matrix[3] = d;
+        this.matrix[4] = e;
+        this.matrix[5] = f;
+
+        this.applyTransform();
+    };
     
     this.translate = function(x, y) {
         if(isNaN(x) || isNaN(y)) { return; }
         this.matrix[4] += this.matrix[0] * x + this.matrix[2] * y;
         this.matrix[5] += this.matrix[1] * x + this.matrix[3] * y;
         
-        this.setTransform();
+        this.applyTransform();
     };
     
     this.rotate = function(rad) {
@@ -91,7 +102,7 @@ function Transform(context) {
         this.matrix[2] = m21;
         this.matrix[3] = m22;
         
-        this.setTransform();
+        this.applyTransform();
     };
 
     this.scale = function(sx, sy) {
@@ -101,7 +112,7 @@ function Transform(context) {
         this.matrix[2] *= sy;
         this.matrix[3] *= sy;
         
-        this.setTransform();
+        this.applyTransform();
     };
     
     //==========================================
@@ -117,19 +128,19 @@ function Transform(context) {
         this.translate(x, y);
         this.rotate(rad);
         this.translate(-x, -y);
-        this.setTransform();
+        this.applyTransform();
     }
 
     this.rotateDegreesAbout = function(deg, x, y) {
         this.translate(x, y);
         this.rotateDegrees(deg);
         this.translate(-x, -y);
-        this.setTransform();
+        this.applyTransform();
     }
     
     this.identity = function() {
         this.m = [1,0,0,1,0,0];
-        this.setTransform();
+        this.applyTransform();
     };
 
     this.multiply = function(matrix) {
@@ -148,7 +159,7 @@ function Transform(context) {
         this.matrix[3] = m22;
         this.matrix[4] = dx;
         this.matrix[5] = dy;
-        this.setTransform();
+        this.applyTransform();
     };
 
     this.invert = function() {
@@ -165,7 +176,7 @@ function Transform(context) {
         this.matrix[3] = m3;
         this.matrix[4] = m4;
         this.matrix[5] = m5;
-        this.setTransform();
+        this.applyTransform();
     };
     
      //==========================================
