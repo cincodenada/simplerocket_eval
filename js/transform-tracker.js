@@ -71,6 +71,7 @@ function Transform(context) {
     };
     
     this.translate = function(x, y) {
+        if(isNaN(x) || isNaN(y)) { return; }
         this.matrix[4] += this.matrix[0] * x + this.matrix[2] * y;
         this.matrix[5] += this.matrix[1] * x + this.matrix[3] * y;
         
@@ -78,6 +79,7 @@ function Transform(context) {
     };
     
     this.rotate = function(rad) {
+        if(isNaN(rad)) { return; }
         var c = Math.cos(rad);
         var s = Math.sin(rad);
         var m11 = this.matrix[0] * c + this.matrix[2] * s;
@@ -93,6 +95,7 @@ function Transform(context) {
     };
 
     this.scale = function(sx, sy) {
+        if(isNaN(sx) || isNaN(sy)) { return; }
         this.matrix[0] *= sx;
         this.matrix[1] *= sx;
         this.matrix[2] *= sy;
