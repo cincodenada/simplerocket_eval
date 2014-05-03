@@ -19,12 +19,14 @@ Rocket.prototype.draw_part = function(idx, with_centroid) {
     if(typeof with_centroid == "undefined") { with_centroid = true; }
     part = this.partslist[idx];
 
+    this.dc.save();
+    this.dc.translate(part.x*2,part.y*2);
+    this.dc.rotate(part.editorAngle*Math.PI/2);
+
     this.dc.beginPath()
-    startpoint = this.part_abs(part, 'shape', 0);
-    this.dc.moveTo(startpoint[0], startpoint[1]);
+    this.dc.moveTo(part.shape[0][0], part.shape[0][1]);
     for(i=1;i<part.shape.length;i++) {
-        curpoint = this.part_abs(part, 'shape', i);
-        this.dc.lineTo(curpoint[0], curpoint[1]);
+        this.dc.lineTo(part.shape[i][0], part.shape[i][1]);
     }
     this.dc.closePath();
     this.dc.stroke();
@@ -35,14 +37,15 @@ Rocket.prototype.draw_part = function(idx, with_centroid) {
         this.dc.beginPath()
 
         //Draw part centroid
-        centroid = this.part_abs(part, 'centroid');
         adj_mass = part.mass - part.fuel_mass*(1-this.get_fuel(idx));
         this.dc.arc(
-            centroid[0],centroid[1],
+            part.centroid[0],part.centroid[1],
             0.25*adj_mass,0,Math.PI*2,false
         );
         this.dc.fill();
     }
+
+    this.dc.restore();
 }
 
 Rocket.prototype.get_fuel = function(idx) {
