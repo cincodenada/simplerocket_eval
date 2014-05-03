@@ -163,6 +163,11 @@ function Transform(context) {
     };
 
     this.invert = function() {
+        this.matrix = this.getInverse();
+        this.applyTransform();
+    };
+
+    this.getInverse = function() {
         var d = 1 / (this.matrix[0] * this.matrix[3] - this.matrix[1] * this.matrix[2]);
         var m0 = this.matrix[3] * d;
         var m1 = -this.matrix[1] * d;
@@ -170,13 +175,7 @@ function Transform(context) {
         var m3 = this.matrix[0] * d;
         var m4 = d * (this.matrix[2] * this.matrix[5] - this.matrix[3] * this.matrix[4]);
         var m5 = d * (this.matrix[1] * this.matrix[4] - this.matrix[0] * this.matrix[5]);
-        this.matrix[0] = m0;
-        this.matrix[1] = m1;
-        this.matrix[2] = m2;
-        this.matrix[3] = m3;
-        this.matrix[4] = m4;
-        this.matrix[5] = m5;
-        this.applyTransform();
+        return [m0,m1,m2,m3,m4,m5];
     };
     
      //==========================================
@@ -187,6 +186,14 @@ function Transform(context) {
         return {
             x: x * this.matrix[0] + y * this.matrix[2] + this.matrix[4], 
             y: x * this.matrix[1] + y * this.matrix[3] + this.matrix[5]
+        };
+    };
+
+    this.detransformPoint = function(x, y) {
+        var tmatrix = this.getInverse();
+        return {
+            x: x * tmatrix[0] + y * tmatrix[2] + tmatrix[4], 
+            y: x * tmatrix[1] + y * tmatrix[3] + tmatrix[5]
         };
     };
 }
