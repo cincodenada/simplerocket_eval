@@ -2,15 +2,18 @@ function Rocket(partslist, dc) {
     this.partslist = partslist;
     this.dc = dc;
     this.engine_fuel = [1];
+    this.selpart = null;
 }
 
 //Draw rocket
 Rocket.prototype.draw = function() {
     var me = this;
+
+    me.dc.strokeStyle = "black";
+    me.dc.lineWidth = 0.1;
+    me.dc.fillStyle = "silver";
     $.each(this.partslist, function(idx, part) {
         //Draw part
-        me.dc.strokeStyle = "black";
-        me.dc.fillStyle = "silver";
         me.draw_part(idx, true);
     });
 }
@@ -22,6 +25,11 @@ Rocket.prototype.draw_part = function(idx, with_centroid) {
     this.dc.save();
     this.dc.translate(part.x*2,part.y*2);
     this.dc.rotate(part.editorAngle*Math.PI/2);
+    //If selected, make selected style
+    if(this.selpart == idx) {
+        this.dc.fillStyle = "goldenrod";
+        this.dc.lineWidth = 0.2;
+    }
 
     this.dc.beginPath()
     this.dc.moveTo(part.shape[0][0], part.shape[0][1]);
@@ -62,31 +70,35 @@ Rocket.prototype.set_fuel = function(idx, value) {
     } else {
         this.engine_fuel[idx] = value;
     }
+    //Clear cached centroid
+    this.centroid = false;
 }
 
 Rocket.prototype.draw_centroid = function() {
     var me = this;
-    avgcentroid = [0,0];
-    total_mass = 0;
-    $.each(this.partslist, function(idx, part) {
-        centroid = me.part_abs(part, 'centroid');
+    if(!me.centroid) {
+        avgcentroid = [0,0];
+        total_mass = 0;
+        $.each(this.partslist, function(idx, part) {
+            centroid = me.part_abs(part, 'centroid');
 
-        adj_mass = part.mass - part.fuel_mass*(1-me.get_fuel(idx));
+            adj_mass = part.mass - part.fuel_mass*(1-me.get_fuel(idx));
 
-        avgcentroid[0] += centroid[0]*adj_mass;
-        avgcentroid[1] += centroid[1]*adj_mass;
+            avgcentroid[0] += centroid[0]*adj_mass;
+            avgcentroid[1] += centroid[1]*adj_mass;
 
-        total_mass += adj_mass;
-    });
-    avgcentroid[0] = avgcentroid[0]/total_mass;
-    avgcentroid[1] = avgcentroid[1]/total_mass;
+            total_mass += adj_mass;
+        });
+        avgcentroid[0] = avgcentroid[0]/total_mass;
+        avgcentroid[1] = avgcentroid[1]/total_mass;
 
-    me.dc.strokeStyle = "green";
-    me.dc.lineWidth = 0.2;
+        me.centroid = avgcentroid;
+    }
 
     //Draw part centroid
-    hairsize = 0.5;
-    me.dc.drawX(avgcentroid[0],avgcentroid[1],0.5);
+    me.dc.strokeStyle = "green";
+    me.dc.lineWidth = 0.2;
+    me.dc.drawX(me.centroid[0],me.centroid[1],0.5);
 }
 
 Rocket.prototype.part_abs = function(part, property, index) {
@@ -97,10 +109,10 @@ Rocket.prototype.part_abs = function(part, property, index) {
     return [
         part.x*2 + prop[0],
         part.y*2 + prop[1]
-    ]
+    ];
 }
 
-Rocket.prototype.getClosestPart = function(mouseevt) {
+Rocket.prototype.getClosestPart = function(mouseevt, maxdist) {
     var me = this;
     var x = mouseevt.pageX - this.dc.canvas.offsetLeft;
     var y = mouseevt.pageY - this.dc.canvas.offsetTop;
@@ -125,5 +137,13 @@ Rocket.prototype.getClosestPart = function(mouseevt) {
         }
     });
 
-    return minidx;
+    if(!maxdist || mindist < maxdist) {
+        return minidx;
+    } else {
+        return null;
+    }
+}
+
+Rocket.prototype.set_selected = function(idx) {
+    this.selpart = idx;
 }

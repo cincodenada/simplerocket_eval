@@ -8,6 +8,8 @@ var rocketdata = {{!json.dumps(rocket_data)}};
 <script type="text/javascript" src="//code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/dark-hive/jquery-ui.css"/>
 <script type="text/javascript" src="/js/rocket.js"></script>
+<script type="text/javascript" src="/js/jquery.event.drag-2.2.js"></script>
+<script type="text/javascript" src="/js/jquery.mousewheel.min.js"></script>
 <style>
 #rocketview {
     height: 90%;
@@ -21,6 +23,7 @@ header {
     font-weight: bold;
     line-height: 1.5em;
     text-shadow: 1px 1px #333; 
+    padding: 0px 10px;
 }
 input { opacity: 0.5; }
 button { opacity: 0.75; }
@@ -86,6 +89,7 @@ Fuel level:
 </canvas>
 <div id="zoom">
 <button value="+">+</button>
+<button value="reset">Reset</button>
 <button value="-">–</button>
 </div>
 <div id="tips">
