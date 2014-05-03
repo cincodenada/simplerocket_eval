@@ -196,9 +196,9 @@ Part.prototype.draw = function(with_centroid) {
 
     if(!this.is_active()) { return false; } 
 
-    this.dc.save();
-    this.dc.translate(this.get('x'),this.get('y'));
-    this.dc.rotate(this.get('editorAngle')*Math.PI/2);
+    this.dc.gt().save();
+    this.dc.gt().translate(this.get('x'),this.get('y'));
+    this.dc.gt().rotate(this.get('editorAngle')*Math.PI/2);
     //If selected, make selected style
     if(this.selected()) {
         this.dc.fillStyle = "goldenrod";
@@ -215,7 +215,7 @@ Part.prototype.draw = function(with_centroid) {
     this.dc.fill();
 
 	if(this.data.type == 'tank') {
-        this.dc.fillStyle = "gray";
+		this.dc.fillStyle = 'rgba(0,0,0,0.25)';
 		fuel_height = (this.data.size[1] * this.get_fuel())
 		this.dc.fillRect(
 			-this.data.size[0]/2,
@@ -240,7 +240,7 @@ Part.prototype.draw = function(with_centroid) {
         this.draw_centroid()
     }
 
-    this.dc.restore();
+    this.dc.gt().restore();
 }
 
 Part.prototype.draw_centroid = function() {

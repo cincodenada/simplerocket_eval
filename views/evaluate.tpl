@@ -11,6 +11,7 @@ var stagedata = {{!json.dumps(stage_data)}};
 <script type="text/javascript" src="/js/rocket.js"></script>
 <script type="text/javascript" src="/js/jquery.event.drag-2.2.js"></script>
 <script type="text/javascript" src="/js/jquery.mousewheel.min.js"></script>
+<script type="text/javascript" src="/js/transform-tracker.js"></script>
 <style>
 #rocketview {
     height: 90%;

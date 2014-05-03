@@ -3,14 +3,6 @@ $(document).ready(function() {
     var scale = 10;
     var scalestep = 0.25;
 
-    var canvelm = document.getElementById('rocketview');
-    var ctx = canvelm.getContext("2d");
-    ctx.canvas.width = canvelm.clientWidth;
-    ctx.canvas.height = canvelm.clientHeight;
-    ctx.translate(ctx.canvas.width/2,ctx.canvas.height/2);
-    ctx.scale(scale,-scale);
-    ctx.lineWidth = 0.1;
-
     CanvasRenderingContext2D.prototype.drawX = function(x,y,hairsize) {
         this.beginPath()
         this.moveTo(x-hairsize,y-hairsize);
@@ -19,6 +11,22 @@ $(document).ready(function() {
         this.lineTo(x+hairsize,y-hairsize);
         this.stroke();
     }
+
+    CanvasRenderingContext2D.prototype.gt = function() {
+        if(!this.useful_transformations) {
+            this.useful_transformations = new Transform(this);
+        }
+        return this.useful_transformations;
+    }
+
+    var canvelm = document.getElementById('rocketview');
+    var ctx = canvelm.getContext("2d");
+    ctx.canvas.width = canvelm.clientWidth;
+    ctx.canvas.height = canvelm.clientHeight;
+    ctx.gt().translate(ctx.canvas.width/2,ctx.canvas.height/2);
+    ctx.gt().scale(scale,-scale);
+    ctx.lineWidth = 0.1;
+
 
     rocket = new Rocket(rocketdata, stagedata, ctx);
     rocket.render();
@@ -50,7 +58,7 @@ $(document).ready(function() {
     });
 
     $(canvelm).on('drag',function(evt, dragdrop) {
-        ctx.translate(
+        ctx.gt().translate(
             (dragdrop.deltaX - dragdrop.lastX)/scale,
             -(dragdrop.deltaY - dragdrop.lastY)/scale
         );
@@ -109,25 +117,25 @@ $(document).ready(function() {
         });
 
     function zoom(relpct, relpoint) {
-        //if(relpoint) { ctx.translate(-relpoint[0]*relpct,-relpoint[1]*relpct); }
-        ctx.scale(1+relpct,1+relpct);
+        //if(relpoint) { ctx.gt().translate(-relpoint[0]*relpct,-relpoint[1]*relpct); }
+        ctx.gt().scale(1+relpct,1+relpct);
         scale += scale*relpct;
         render();
     }
 
     function resetview() {
         scale = 10;
-        ctx.setTransform(1,0,0,1,0,0);
-        ctx.translate(ctx.canvas.width/2,ctx.canvas.height/2);
-        ctx.scale(scale,-scale);
+        ctx.gt().setTransform(1,0,0,1,0,0);
+        ctx.gt().translate(ctx.canvas.width/2,ctx.canvas.height/2);
+        ctx.gt().scale(scale,-scale);
         render();
     }
 
     function render() {
-        ctx.save();
-        ctx.setTransform(1,0,0,1,0,0)
+        ctx.gt().save();
+        ctx.gt().setTransform(1,0,0,1,0,0);
         ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
-        ctx.restore();
+        ctx.gt().restore();
 
         rocket.render();
     }
