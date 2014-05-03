@@ -207,5 +207,7 @@ class ShipPart:
             'size': self.get_size(),
             'shape': self.get_shape(),
             'type': self.elem.get('type'),
+            'id': self.elem.get('id'),
+            'name': self.elem.get('name'),
         }
 

@@ -21,8 +21,7 @@ $(document).ready(function() {
     }
 
     rocket = new Rocket(rocketdata, stagedata, ctx);
-    rocket.draw();
-    rocket.draw_centroid();
+    rocket.render();
 
     slidermax = 10000;
     $('#fuelslider').slider({
@@ -41,7 +40,11 @@ $(document).ready(function() {
 
     $(canvelm).on('click',function(evt) {
         idx = rocket.getClosestPart(evt, 10);
-        rocket.set_selected(idx);
+        if(evt.shiftKey) {
+            rocket.toggle_selected(idx);
+        } else {
+            rocket.set_selected(idx);
+        }
         
         render();
 
@@ -98,6 +101,17 @@ $(document).ready(function() {
         zoom(curscale);
     });
 
+    $('#stage').empty();
+    for(i=0;i<stagedata.parts.length;i++) {
+        $('#stage').append('<option value="' + i + '">Stage ' + (i+1) + '</option>');
+    }
+    $('#stage')
+        .prop('disabled',false)
+        .on('change',function() {
+            rocket.set_stage($(this).val());
+            render();
+        });
+
     function zoom(relpct, relpoint) {
         //if(relpoint) { ctx.translate(-relpoint[0]*relpct,-relpoint[1]*relpct); }
         ctx.scale(1+relpct,1+relpct);
@@ -119,8 +133,7 @@ $(document).ready(function() {
         ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
         ctx.restore();
 
-        rocket.draw();
-        rocket.draw_centroid();
+        rocket.render();
     }
 });
 

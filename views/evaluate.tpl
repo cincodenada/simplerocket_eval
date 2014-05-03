@@ -74,6 +74,9 @@ h2 { margin-top: 0px; }
 <body>
 <header>
 Load rocket: <input type="text" id="load_rocket"/><button id="load_button">Load</button>
+<select id="stage" name="stage" disabled>
+<option value="1">Stage 1</option>
+</select>
 <span style="float: right">
 Showing
 %if rocket_id:

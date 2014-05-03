@@ -1,10 +1,19 @@
+/* 
+ * Rocket 
+ */
 function Rocket(partslist, stagedata, dc) {
     this.partslist = partslist;
     this.stagedata = stagedata;
     this.dc = dc;
     this.engine_fuel = [1];
     this.selpart = {};
-    this.curstage = 2;
+    this.curstage = 0;
+
+    //Build parts list
+    this.parts = [];
+    for(i=0;i<partslist.length;i++) {
+        this.parts.push(new Part(this, i));
+    }
 }
 
 //Draw rocket
@@ -14,64 +23,10 @@ Rocket.prototype.draw = function() {
     me.dc.strokeStyle = "black";
     me.dc.lineWidth = 0.1;
     me.dc.fillStyle = "silver";
-    $.each(this.partslist, function(idx, part) {
+    $.each(this.parts, function(idx, part) {
         //Draw part
-        me.draw_part(idx, true);
+        part.draw(true);
     });
-}
-
-Rocket.prototype.is_active = function(idx) {
-    if(this.curstage == null) {
-        return true;
-    } else {
-        included = false;
-        for(c=0;c < stagedata[this.curstage].length;c++) {
-            if(stagedata[this.curstage][c] == this.partslist[idx].id) {
-                included = true;
-            }
-        }
-        return included;
-    }
-}
-
-Rocket.prototype.draw_part = function(idx, with_centroid) {
-    if(typeof with_centroid == "undefined") { with_centroid = true; }
-
-    part = this.partslist[idx];
-    if(!this.is_active(idx)) { return false; } 
-
-    this.dc.save();
-    this.dc.translate(part.x*2,part.y*2);
-    this.dc.rotate(part.editorAngle*Math.PI/2);
-    //If selected, make selected style
-    if(this.selpart[idx]) {
-        this.dc.fillStyle = "goldenrod";
-        this.dc.lineWidth = 0.2;
-    }
-
-    this.dc.beginPath()
-    this.dc.moveTo(part.shape[0][0], part.shape[0][1]);
-    for(i=1;i<part.shape.length;i++) {
-        this.dc.lineTo(part.shape[i][0], part.shape[i][1]);
-    }
-    this.dc.closePath();
-    this.dc.stroke();
-    this.dc.fill();
-
-    if(with_centroid) {
-        this.dc.fillStyle = "red";
-        this.dc.beginPath()
-
-        //Draw part centroid
-        adj_mass = part.mass - part.fuel_mass*(1-this.get_fuel(idx));
-        this.dc.arc(
-            part.centroid[0],part.centroid[1],
-            0.25*adj_mass,0,Math.PI*2,false
-        );
-        this.dc.fill();
-    }
-
-    this.dc.restore();
 }
 
 Rocket.prototype.get_fuel = function(idx) {
@@ -97,15 +52,13 @@ Rocket.prototype.draw_centroid = function() {
     if(!me.centroid) {
         avgcentroid = [0,0];
         total_mass = 0;
-        $.each(this.partslist, function(idx, part) {
-            if(me.is_active(idx)) {
-                centroid = me.part_abs(part, 'centroid');
-
-                adj_mass = part.mass - part.fuel_mass*(1-me.get_fuel(idx));
+        $.each(this.parts, function(idx, part) {
+            if(part.is_active()) {
+                centroid = part.get_abs('centroid');
+                adj_mass = part.get_mass();
 
                 avgcentroid[0] += centroid[0]*adj_mass;
                 avgcentroid[1] += centroid[1]*adj_mass;
-
                 total_mass += adj_mass;
             }
         });
@@ -119,17 +72,6 @@ Rocket.prototype.draw_centroid = function() {
     me.dc.strokeStyle = "green";
     me.dc.lineWidth = 0.2;
     me.dc.drawX(me.centroid[0],me.centroid[1],0.5);
-}
-
-Rocket.prototype.part_abs = function(part, property, index) {
-    prop = part[property];
-    if(index != undefined) {
-        prop = prop[index];
-    }
-    return [
-        part.x*2 + prop[0],
-        part.y*2 + prop[1]
-    ];
 }
 
 Rocket.prototype.getClosestPart = function(mouseevt, maxdist) {
@@ -146,7 +88,7 @@ Rocket.prototype.getClosestPart = function(mouseevt, maxdist) {
     mindist = 999999;
     minidx = null;
     $.each(this.partslist, function(idx, part) {
-        point = me.part_abs(part, 'centroid');
+        point = part.get_abs('centroid');
         dist = Math.sqrt(
             Math.pow(point[0] - x,2) +
             Math.pow(point[1] - y,2)
@@ -164,11 +106,146 @@ Rocket.prototype.getClosestPart = function(mouseevt, maxdist) {
     }
 }
 
-Rocket.prototype.add_selected = function(idx) {
+Rocket.prototype.select = function(idx) {
     this.selpart[idx] = true;
+}
+
+Rocket.prototype.deselect = function(idx) {
+    this.selpart[idx] = false;
+}
+
+Rocket.prototype.toggle_selected = function(idx) {
+    this.selpart[idx] = !this.selpart[idx];
 }
 
 Rocket.prototype.set_selected = function(idx) {
     this.selpart = {};
     this.selpart[idx] = true;
+}
+
+Rocket.prototype.render = function() {
+    this.draw();
+    this.draw_centroid();
+}
+
+Rocket.prototype.set_stage = function(stage) {
+    this.curstage = stage;
+    this.centroid = false;
+}
+
+
+/*
+ * Rocket Part
+ */
+function Part(rocket, idx) {
+    this.idx = idx;
+    this.rocket = rocket;
+
+    this.data = this.rocket.partslist[idx];
+    this.dc = this.rocket.dc;
+
+    //Find our stage
+    if(this.data.type == 'detacher') {
+        for(s=0;s<this.rocket.stagedata.detachers.length;s++) {
+            for(p=0;p<this.rocket.stagedata.detachers[s].length;p++) {
+                if(this.rocket.stagedata.detachers[s][p] == this.data.id) {
+                    this.stage = s;
+                    break;
+                }
+            }
+        }
+    } else {
+        for(s=0;s<this.rocket.stagedata.parts.length;s++) {
+            for(p=0;p<this.rocket.stagedata.parts[s].length;p++) {
+                if(this.rocket.stagedata.parts[s][p] == this.data.id) {
+                    this.stage = s;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+Part.prototype.get = function(attr) {
+    switch(attr) {
+    case "x":
+    case "y":
+        return this.data[attr]*2;
+    default:
+        return this.data[attr];
+    }
+}
+
+Part.prototype.selected = function() {
+    return this.rocket.selpart[this.idx];
+}
+
+Part.prototype.is_active = function() {
+    if(this.rocket.curstage == null) {
+        return true;
+    } else {
+        return (this.stage >= this.rocket.curstage);
+    }
+}
+
+Part.prototype.draw = function(with_centroid) {
+    if(typeof with_centroid == "undefined") { with_centroid = true; }
+
+    if(!this.is_active()) { return false; } 
+
+    this.dc.save();
+    this.dc.translate(this.get('x'),this.get('y'));
+    this.dc.rotate(this.get('editorAngle')*Math.PI/2);
+    //If selected, make selected style
+    if(this.selected()) {
+        this.dc.fillStyle = "goldenrod";
+        this.dc.lineWidth = 0.2;
+    }
+
+    this.dc.beginPath()
+    this.dc.moveTo(this.data.shape[0][0], this.data.shape[0][1]);
+    for(i=1;i<this.data.shape.length;i++) {
+        this.dc.lineTo(this.data.shape[i][0], this.data.shape[i][1]);
+    }
+    this.dc.closePath();
+    this.dc.stroke();
+    this.dc.fill();
+
+    if(with_centroid) {
+        this.draw_centroid()
+    }
+
+    this.dc.restore();
+}
+
+Part.prototype.draw_centroid = function() {
+    this.dc.fillStyle = "red";
+    this.dc.beginPath()
+
+    //Draw part centroid
+    adj_mass = this.data.mass - this.data.fuel_mass*(1-this.get_fuel());
+    this.dc.arc(
+        this.data.centroid[0],this.data.centroid[1],
+        0.25*adj_mass,0,Math.PI*2,false
+    );
+    this.dc.fill();
+}
+
+Part.prototype.get_abs = function(attr, index) {
+    prop = this.data[attr];
+    if(index != undefined) {
+        prop = prop[index];
+    }
+    return [
+        this.data.x*2 + prop[0],
+        this.data.y*2 + prop[1]
+    ];
+}
+
+Part.prototype.get_mass = function() {
+    return this.data.mass - this.data.fuel_mass*(1-this.get_fuel());
+}
+
+Part.prototype.get_fuel = function() {
+    return this.rocket.get_fuel(this.idx);
 }
