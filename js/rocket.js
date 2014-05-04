@@ -89,12 +89,8 @@ Rocket.prototype.draw_centroid = function() {
     me.dc.drawX(me.centroid[0],me.centroid[1],0.5);
 }
 
-Rocket.prototype.getClosestPart = function(mouseevt, maxdist) {
+Rocket.prototype.getClosestPart = function(clicked, maxdist) {
     var me = this;
-    var x = mouseevt.pageX - this.dc.canvas.offsetLeft;
-    var y = mouseevt.pageY - this.dc.canvas.offsetTop;
-
-    clicked = me.dc.gt().detransformPoint(x, y);
 
     //Debug
     //this.dc.drawX(x,y,0.75);

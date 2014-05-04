@@ -55,7 +55,8 @@ $(document).ready(function() {
     });
 
     $(canvelm).on('click',function(evt) {
-        idx = rocket.getClosestPart(evt, 10);
+        relpoint = getCanvasPoint(evt);
+        idx = rocket.getClosestPart(relpoint, 10);
         if(evt.shiftKey) {
             rocket.toggle_selected(idx);
         } else {
@@ -69,6 +70,11 @@ $(document).ready(function() {
             .data('cur_engine',idx);
     });
 
+    $(canvelm).on('dblclick',function(evt) {
+        relpoint = getCanvasPoint(evt);
+        zoom(scalestep, evt);
+    });
+
     $(canvelm).on('drag',function(evt, dragdrop) {
         ctx.gt().translate(
             (dragdrop.deltaX - dragdrop.lastX)/scale,
@@ -80,11 +86,7 @@ $(document).ready(function() {
     });
 
     $(canvelm).on('mousewheel',function(evt) {
-        canvaspoint = [
-            (evt.pageX - this.offsetLeft)/scale,
-            (evt.pageY - this.offsetTop)/scale
-        ];
-        zoom(scalestep*evt.deltaY, canvaspoint);
+        zoom(scalestep*evt.deltaY, evt);
         evt.preventDefault();
     });
 
@@ -128,9 +130,13 @@ $(document).ready(function() {
             render();
         });
 
-    function zoom(relpct, relpoint) {
-        //if(relpoint) { ctx.gt().translate(-relpoint[0]*relpct,-relpoint[1]*relpct); }
+    function zoom(relpct, mouseevt) {
+        if(mouseevt) { prevpoint = getCanvasPoint(mouseevt); }
         ctx.gt().scale(1+relpct,1+relpct);
+        if(mouseevt) {
+            newpoint = getCanvasPoint(mouseevt);
+            ctx.gt().translate((newpoint.x - prevpoint.x),(newpoint.y - prevpoint.y));
+        }
         scale += scale*relpct;
         render();
     }
@@ -150,6 +156,13 @@ $(document).ready(function() {
         ctx.gt().restore();
 
         rocket.render();
+    }
+
+    function getCanvasPoint(mouseevt) {
+        var x = mouseevt.pageX - ctx.canvas.offsetLeft;
+        var y = mouseevt.pageY - ctx.canvas.offsetTop;
+
+        return ctx.gt().detransformPoint(x, y);
     }
 });
 

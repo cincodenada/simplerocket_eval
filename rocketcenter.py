@@ -31,7 +31,8 @@ def server_static(type, filename, subdir = ''):
 def get_app():
     return default_app()
 
-os.chdir(os.path.dirname(__file__))
+if(os.path.dirname(__file__)):
+    os.chdir(os.path.dirname(__file__))
 partbin = sr.PartsBin('PartList.xml')
 shipsprites = sr.SpriteMap('img/sprites/ShipSprites.xml')
 
