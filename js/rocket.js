@@ -161,8 +161,8 @@ function Part(rocket, idx) {
     //Find our stage
     if(this.data.type == 'detacher') {
         for(s=0;s<this.rocket.stagedata.detachers.length;s++) {
-            for(p=0;p<this.rocket.stagedata.detachers[s].length;p++) {
-                if(this.rocket.stagedata.detachers[s][p] == this.data.id) {
+            for(p=0;p<this.rocket.stagedata.detachers[s][1].length;p++) {
+                if(this.rocket.stagedata.detachers[s][1][p] == this.data.id) {
                     this.stage = s;
                     break;
                 }
