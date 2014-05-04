@@ -71,18 +71,18 @@ function Transform(context) {
     };
 
     this.setTransform = function(a, b, c, d, e, f) {
-		this.matrix[0] = a;
-		this.matrix[1] = b;
-		this.matrix[2] = c;
-		this.matrix[3] = d;
-		this.matrix[4] = e;
-		this.matrix[5] = f;
+        this.matrix[0] = a;
+        this.matrix[1] = b;
+        this.matrix[2] = c;
+        this.matrix[3] = d;
+        this.matrix[4] = e;
+        this.matrix[5] = f;
 
-		this.applyTransform();
+        this.applyTransform();
     };
     
     this.translate = function(x, y) {
-		if(isNaN(x) || isNaN(y)) { return; }
+        if(isNaN(x) || isNaN(y)) { return; }
         this.matrix[4] += this.matrix[0] * x + this.matrix[2] * y;
         this.matrix[5] += this.matrix[1] * x + this.matrix[3] * y;
         
@@ -90,7 +90,7 @@ function Transform(context) {
     };
     
     this.rotate = function(rad) {
-		if(isNaN(rad)) { return; }
+        if(isNaN(rad)) { return; }
         var c = Math.cos(rad);
         var s = Math.sin(rad);
         var m11 = this.matrix[0] * c + this.matrix[2] * s;
@@ -106,7 +106,7 @@ function Transform(context) {
     };
 
     this.scale = function(sx, sy) {
-		if(isNaN(sx) || isNaN(sy)) { return; }
+        if(isNaN(sx) || isNaN(sy)) { return; }
         this.matrix[0] *= sx;
         this.matrix[1] *= sx;
         this.matrix[2] *= sy;
@@ -163,11 +163,11 @@ function Transform(context) {
     };
 
     this.invert = function() {
-		this.matrix = this.getInverse();
+        this.matrix = this.getInverse();
         this.applyTransform();
     };
 
-	this.getInverse = function() {
+    this.getInverse = function() {
         var d = 1 / (this.matrix[0] * this.matrix[3] - this.matrix[1] * this.matrix[2]);
         var m0 = this.matrix[3] * d;
         var m1 = -this.matrix[1] * d;
@@ -175,8 +175,8 @@ function Transform(context) {
         var m3 = this.matrix[0] * d;
         var m4 = d * (this.matrix[2] * this.matrix[5] - this.matrix[3] * this.matrix[4]);
         var m5 = d * (this.matrix[1] * this.matrix[4] - this.matrix[0] * this.matrix[5]);
-		return [m0,m1,m2,m3,m4,m5];
-	}
+        return [m0,m1,m2,m3,m4,m5];
+    };
     
      //==========================================
     // Helpers
@@ -190,7 +190,7 @@ function Transform(context) {
     };
 
     this.detransformPoint = function(x, y) {
-		var tmatrix = this.getInverse();
+        var tmatrix = this.getInverse();
         return {
             x: x * tmatrix[0] + y * tmatrix[2] + tmatrix[4], 
             y: x * tmatrix[1] + y * tmatrix[3] + tmatrix[5]
