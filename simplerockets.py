@@ -200,14 +200,24 @@ class ShipPart:
 
 
     def get_dict(self):
-        return {
+        data = {k: v for k, v in self.elem.attrib.iteritems() if k not in('id')};
+        data.update({
             'centroid': self.get_centroid(),
             'mass': self.get_mass(),
             'fuel_mass': self.get_fuel_mass(),
             'size': self.get_size(),
             'shape': self.get_shape(),
-            'type': self.elem.get('type'),
-            'id': self.elem.get('id'),
-            'name': self.elem.get('name'),
-        }
+        })
+        return data
 
+class SpriteMap:
+    def __init__(self, xmlfile):
+        sprite_xml = ET.ElementTree()
+        sprite_xml.parse(xmlfile)
+        self.sprite_list = {}
+
+        for sprite in sprite_xml.findall('./sprite'):
+            self.sprite_list[sprite.get('n').lower()] = sprite.attrib
+
+    def get_dict(self):
+        return self.sprite_list

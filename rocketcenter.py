@@ -20,17 +20,20 @@ def evaluate(rocket_id = None):
             'parts': ship.stage_parts,
             'detachers': ship.detacher_list,
         },
+        'sprite_data': shipsprites.get_dict(),
     }
 
 @route('/<type:re:(js|css|img)>/<filename>')
-def server_static(type, filename):
-    return static_file(os.path.join(type, filename),'./')
+@route('/<type:re:(js|css|img)>/<subdir:path>/<filename>')
+def server_static(type, filename, subdir = ''):
+    return static_file(os.path.join(type, subdir, filename),'./')
 
 def get_app():
     return default_app()
 
 os.chdir(os.path.dirname(__file__))
 partbin = sr.PartsBin('PartList.xml')
+shipsprites = sr.SpriteMap('img/sprites/ShipSprites.xml')
 
 if __name__ == "__main__":
     run(host='localhost',port=54321,reloader=True)

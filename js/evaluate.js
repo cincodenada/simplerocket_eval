@@ -33,8 +33,15 @@ $(document).ready(function() {
     ctx.lineWidth = 0.1;
 
 
-    rocket = new Rocket(rocketdata, stagedata, ctx);
-    rocket.render();
+    rocket = new Rocket({
+        'parts':rocketdata,
+        'stages':stagedata,
+        'sprites':spritedata,
+        'spriteurl': '/img/sprites/ShipSprites.png'
+    }, ctx);
+    rocket.sprite.onload = function() {
+        rocket.render();
+    };
 
     slidermax = 10000;
     $('#fuelslider').slider({

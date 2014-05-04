@@ -1,17 +1,23 @@
 /* 
  * Rocket 
  */
-function Rocket(partslist, stagedata, dc) {
-    this.partslist = partslist;
-    this.stagedata = stagedata;
+function Rocket(data, dc) {
+    this.partslist = data.parts;
+    this.stagedata = data.stages;
     this.dc = dc;
     this.engine_fuel = [1];
     this.selpart = [];
     this.curstage = 0;
 
+    this.fuel_style = 'overlay';
+
+    this.spritemap = data.sprites;
+    this.sprite = new Image();
+    this.sprite.src = data.spriteurl;
+
     //Build parts list
     this.parts = [];
-    for(i=0;i<partslist.length;i++) {
+    for(i=0;i<this.partslist.length;i++) {
         this.parts.push(new Part(this, i));
     }
 }
@@ -75,7 +81,10 @@ Rocket.prototype.draw_centroid = function() {
     }
 
     //Draw part centroid
-    me.dc.strokeStyle = "green";
+    me.dc.strokeStyle = "black";
+    me.dc.lineWidth = 0.4;
+    me.dc.drawX(me.centroid[0],me.centroid[1],0.6);
+    me.dc.strokeStyle = "yellow";
     me.dc.lineWidth = 0.2;
     me.dc.drawX(me.centroid[0],me.centroid[1],0.5);
 }
@@ -169,6 +178,9 @@ function Part(rocket, idx) {
             }
         }
     }
+
+    //Pull in our sprite data
+    this.spritedata = this.rocket.spritemap[this.data.sprite.toLowerCase()];
 }
 
 Part.prototype.get = function(attr) {
@@ -201,42 +213,55 @@ Part.prototype.draw = function(with_centroid) {
     this.dc.gt().save();
     this.dc.gt().translate(this.get('x'),this.get('y'));
     this.dc.gt().rotate(this.get('editorAngle')*Math.PI/2);
+
+    //Draw sprite
+    this.dc.gt().save()
+    this.dc.gt().rotate(Math.PI);
+    this.dc.drawImage(this.rocket.sprite, 
+        this.spritedata.x, this.spritedata.y, this.spritedata.w, this.spritedata.h,
+        -this.data.size[0]/2, -this.data.size[1]/2, this.data.size[0], this.data.size[1]
+    );
+    this.dc.gt().restore()
+
+    //Draw fuel
+	if(this.data.type == 'tank') {
+        fuel_height = (this.data.size[1] * this.get_fuel());
+        switch(this.rocket.fuel_style) {
+        case 'bar':
+            this.dc.fillStyle = 'rgb(0,128,0)';
+            this.dc.fillRect(
+                -this.data.size[0]/2,
+                -this.data.size[1]/2,
+                0.5,
+                fuel_height
+            );
+            break;
+        default:
+        case 'overlay':
+            this.dc.fillStyle = 'rgba(0,255,0,0.25)';
+            this.dc.fillRect(
+                -this.data.size[0]/2,
+                -this.data.size[1]/2,
+                this.data.size[0],
+                fuel_height
+            );
+            break;
+        }
+	}
+
     //If selected, make selected style
     if(this.selected()) {
-        this.dc.fillStyle = "goldenrod";
+        this.dc.strokeStyle = "goldenrod";
         this.dc.lineWidth = 0.2;
-    }
 
-    this.dc.beginPath()
-    this.dc.moveTo(this.data.shape[0][0], this.data.shape[0][1]);
-    for(i=1;i<this.data.shape.length;i++) {
-        this.dc.lineTo(this.data.shape[i][0], this.data.shape[i][1]);
+        this.dc.beginPath()
+        this.dc.moveTo(this.data.shape[0][0], this.data.shape[0][1]);
+        for(i=1;i<this.data.shape.length;i++) {
+            this.dc.lineTo(this.data.shape[i][0], this.data.shape[i][1]);
+        }
+        this.dc.closePath();
+        this.dc.stroke();
     }
-    this.dc.closePath();
-    this.dc.stroke();
-    this.dc.fill();
-
-	if(this.data.type == 'tank') {
-		this.dc.fillStyle = 'rgba(0,0,0,0.25)';
-		fuel_height = (this.data.size[1] * this.get_fuel())
-		this.dc.fillRect(
-			-this.data.size[0]/2,
-			-this.data.size[1]/2,
-			this.data.size[0],
-			fuel_height
-		);
-		/*
-		this.dc.clip();
-        this.dc.fillStyle = "green";
-        this.dc.lineWidth = 0;
-		this.dc.fillRect(
-			this.get('x')-this.data.size[0]/2,
-			this.get('y')-this.data.size[1]/2,
-			this.data.size[0],
-			this.data.size[1]
-		);
-		*/
-	}
 
     if(with_centroid) {
         this.draw_centroid()
