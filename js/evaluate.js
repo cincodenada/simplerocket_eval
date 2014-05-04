@@ -99,7 +99,7 @@ $(document).ready(function() {
 
     $('.closebtn').on('click',function(evt) {
         evt.preventDefault();
-        evt.stopPropagation(); 
+        evt.stopPropagation();
         $(this).parent().toggleClass('closed');
     })
 

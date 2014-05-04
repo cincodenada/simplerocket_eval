@@ -17,7 +17,7 @@ function Rocket(data, dc) {
 
     //Build parts list
     this.parts = [];
-    for(i=0;i<this.partslist.length;i++) {
+    for(var i=0;i<this.partslist.length;i++) {
         this.parts.push(new Part(this, i));
     }
 }
@@ -30,9 +30,17 @@ Rocket.prototype.draw = function() {
     me.dc.lineWidth = 0.1;
     me.dc.fillStyle = "silver";
     $.each(this.parts, function(idx, part) {
-        //Draw part
-        part.draw(true);
+        //Draw non-selected parts
+        if(!part.selected()) {
+            part.draw(true);
+        }
     });
+    //Draw selected parts last, so they show up on top
+    for(var i=0; i<this.selpart.length; i++) {
+        if(this.selpart[i]) {
+            this.parts[i].draw(true);
+        }
+    }
 }
 
 Rocket.prototype.get_fuel = function(idx) {
@@ -47,7 +55,7 @@ Rocket.prototype.set_fuel = function(value) {
 	anysel = false;
 	if(this.selpart.length == 1) { this.engine_fuel = [value]; }
 	else {
-		for(i=0;i<this.selpart.length;i++) {
+		for(var i=0;i<this.selpart.length;i++) {
 			if(this.selpart[i]) {
 				this.engine_fuel[i] = value;
 				anysel = true;
@@ -94,10 +102,16 @@ Rocket.prototype.getClosestPart = function(clicked, maxdist) {
 
     //Debug
     //this.dc.drawX(x,y,0.75);
+    var insidelist = []
 
     mindist = 999999;
     minidx = null;
     $.each(this.parts, function(idx, part) {
+        //Test for square bounds
+        if(part.box_contains(clicked.x, clicked.y)) {
+            insidelist.push(idx);
+        }
+
         point = part.get_abs('centroid');
         dist = Math.sqrt(
             Math.pow(point[0] - clicked.x,2) +
@@ -109,7 +123,9 @@ Rocket.prototype.getClosestPart = function(clicked, maxdist) {
         }
     });
 
-    if(!maxdist || mindist < maxdist) {
+    if(insidelist.length == 1) {
+        return insidelist[0];
+    } else if(!maxdist || mindist < maxdist) {
         return minidx;
     } else {
         return null;
@@ -205,6 +221,15 @@ Part.prototype.is_active = function() {
     }
 }
 
+Part.prototype.box_contains = function(x, y) {
+    return (
+        (this.get('x') - this.data.size[0]/2) < x &&
+        (this.get('x') + this.data.size[0]/2) > x &&
+        (this.get('y') - this.data.size[1]/2) < y &&
+        (this.get('y') + this.data.size[1]/2) > y
+    );
+}
+
 Part.prototype.draw = function(with_centroid) {
     if(typeof with_centroid == "undefined") { with_centroid = true; }
 
@@ -256,7 +281,7 @@ Part.prototype.draw = function(with_centroid) {
 
         this.dc.beginPath()
         this.dc.moveTo(this.data.shape[0][0], this.data.shape[0][1]);
-        for(i=1;i<this.data.shape.length;i++) {
+        for(var i=1;i<this.data.shape.length;i++) {
             this.dc.lineTo(this.data.shape[i][0], this.data.shape[i][1]);
         }
         this.dc.closePath();
