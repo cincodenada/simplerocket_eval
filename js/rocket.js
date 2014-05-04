@@ -159,21 +159,25 @@ function Part(rocket, idx) {
     this.dc = this.rocket.dc;
 
     //Find our stage
-    if(this.data.type == 'detacher') {
-        for(s=0;s<this.rocket.stagedata.detachers.length;s++) {
-            for(p=0;p<this.rocket.stagedata.detachers[s][1].length;p++) {
-                if(this.rocket.stagedata.detachers[s][1][p] == this.data.id) {
-                    this.stage = s;
-                    break;
+    if(this.rocket.stagedata.detachers.length == 0) {
+        this.stage = 0;
+    } else {
+        if(this.data.type == 'detacher') {
+            for(s=0;s<this.rocket.stagedata.detachers.length;s++) {
+                for(p=0;p<this.rocket.stagedata.detachers[s][1].length;p++) {
+                    if(this.rocket.stagedata.detachers[s][1][p] == this.data.id) {
+                        this.stage = s;
+                        break;
+                    }
                 }
             }
-        }
-    } else {
-        for(s=0;s<this.rocket.stagedata.parts.length;s++) {
-            for(p=0;p<this.rocket.stagedata.parts[s].length;p++) {
-                if(this.rocket.stagedata.parts[s][p] == this.data.id) {
-                    this.stage = s;
-                    break;
+        } else {
+            for(s=0;s<this.rocket.stagedata.parts.length;s++) {
+                for(p=0;p<this.rocket.stagedata.parts[s].length;p++) {
+                    if(this.rocket.stagedata.parts[s][p] == this.data.id) {
+                        this.stage = s;
+                        break;
+                    }
                 }
             }
         }
