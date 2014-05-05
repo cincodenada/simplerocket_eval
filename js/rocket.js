@@ -10,7 +10,8 @@ function Rocket(data, dc) {
     this.curstage = 0;
 
     this.fuel_style = 'overlay';
-    this.drawmode = 'wireframe';
+    this.drawmode = 'sprites';
+    this.show_annotations = true;
 
     this.spritemap = data.sprites;
     this.sprite = new Image();
@@ -53,6 +54,7 @@ Rocket.prototype.get_fuel = function(idx) {
 }
 
 Rocket.prototype.set_fuel = function(value) {
+    this.show_annotations = true;
 	anysel = false;
 	if(this.selpart.length == 1) { this.engine_fuel = [value]; }
 	else {
@@ -258,6 +260,7 @@ Part.prototype.draw = function(with_centroid) {
 
     this.dc.gt().save();
     this.dc.gt().translate(this.get('x'),this.get('y'));
+    this.dc.gt().scale(this.data.flippedX*2-1,1-this.data.flippedY*2);
     this.dc.gt().rotate(this.get('editorAngle')*Math.PI/2);
 
     switch(this.rocket.drawmode) {
@@ -267,7 +270,7 @@ Part.prototype.draw = function(with_centroid) {
         this.dc.gt().rotate(Math.PI);
         this.dc.drawImage(this.rocket.sprite, 
             this.spritedata.x, this.spritedata.y, this.spritedata.w, this.spritedata.h,
-            -this.data.size[0]/2, -this.data.size[1]/2, this.data.size[0], this.data.size[1]
+            -this.data.actual_size[0]/2, -this.data.actual_size[1]/2, this.data.actual_size[0], this.data.actual_size[1]
         );
         this.dc.gt().restore()
         break;
@@ -282,31 +285,38 @@ Part.prototype.draw = function(with_centroid) {
         break;
     }
 
-    //Draw fuel
-	if(this.data.type == 'tank') {
-        fuel_height = (this.data.size[1] * this.get_fuel());
-        switch(this.rocket.fuel_style) {
-        case 'bar':
-            this.dc.fillStyle = 'rgb(0,128,0)';
-            this.dc.fillRect(
-                -this.data.size[0]/2,
-                -this.data.size[1]/2,
-                0.5,
-                fuel_height
-            );
-            break;
-        default:
-        case 'overlay':
-            this.dc.fillStyle = 'rgba(0,255,0,0.25)';
-            this.dc.fillRect(
-                -this.data.size[0]/2,
-                -this.data.size[1]/2,
-                this.data.size[0],
-                fuel_height
-            );
-            break;
+    if(this.rocket.show_annotations) {
+        //Draw fuel
+        if(this.data.type == 'tank') {
+            fuel_height = (this.data.size[1] * this.get_fuel());
+            switch(this.rocket.fuel_style) {
+            case 'bar':
+                this.dc.fillStyle = 'rgb(0,128,0)';
+                this.dc.fillRect(
+                    -this.data.size[0]/2,
+                    -this.data.size[1]/2,
+                    0.5,
+                    fuel_height
+                );
+                break;
+            default:
+            case 'overlay':
+                this.dc.fillStyle = 'rgba(0,255,0,0.25)';
+                this.dc.fillRect(
+                    -this.data.size[0]/2,
+                    -this.data.size[1]/2,
+                    this.data.size[0],
+                    fuel_height
+                );
+                break;
+            }
         }
-	}
+
+        if(with_centroid) {
+            this.draw_centroid()
+        }
+    }
+
 
     //If selected, make selected style
     if(this.selected()) {
@@ -316,9 +326,6 @@ Part.prototype.draw = function(with_centroid) {
         this.dc.stroke();
     }
 
-    if(with_centroid) {
-        this.draw_centroid()
-    }
 
     this.dc.gt().restore();
 }

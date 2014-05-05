@@ -140,7 +140,7 @@ class PartInstance:
         retdict = self.part.get_dict()
         retdict.update({k: float(v)
             for k, v in self.elem.attrib.iteritems()
-            if k in ('x','y','editorAngle','id')
+            if k in ('x','y','editorAngle','flippedX','flippedY','id')
         })
         return retdict
 
@@ -198,15 +198,26 @@ class ShipPart:
                 for v in shape.findall('./Vertex')
             )
 
+    def get_actual_size(self, shape):
+        maxx = maxy = 0
+        for curpoint in shape:
+            if(abs(curpoint[0]) > maxx):
+                maxx = abs(curpoint[0])
+            if(abs(curpoint[1]) > maxy):
+                maxy = abs(curpoint[1])
+        return (maxx*2,maxy*2)
+
 
     def get_dict(self):
+        shape = self.get_shape();
         data = {k: v for k, v in self.elem.attrib.iteritems() if k not in('id')};
         data.update({
             'centroid': self.get_centroid(),
             'mass': self.get_mass(),
             'fuel_mass': self.get_fuel_mass(),
             'size': self.get_size(),
-            'shape': self.get_shape(),
+            'shape': shape,
+            'actual_size': self.get_actual_size(shape),
         })
         return data
 

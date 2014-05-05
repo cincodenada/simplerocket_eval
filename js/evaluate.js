@@ -157,6 +157,11 @@ $(document).ready(function() {
             render();
         });
 
+    $('#evaluate').on('change',function() {
+        rocket.show_annotations = $(this).prop('checked');
+        render();
+    });
+
     function zoom(relpct, mouseevt) {
         if(mouseevt) { prevpoint = getCanvasPoint(mouseevt); }
         ctx.gt().scale(1+relpct,1+relpct);

@@ -1,6 +1,7 @@
 %import json
 <html>
 <head>
+<meta property="og:image" content="/img/thumbnail.png"/>
 <script type="text/javascript">
 var rocketdata = {{!json.dumps(rocket_data)}};
 var stagedata = {{!json.dumps(stage_data)}};
@@ -101,6 +102,10 @@ Load rocket: <input type="text" id="load_rocket"/><button id="load_button">Load<
 <select id="stage" name="stage" disabled>
 <option value="1">Stage 1</option>
 </select>
+<label>
+<input type="checkbox" id="evaluate" checked="checked"/>
+Show detailed analysis
+</label>
 <span style="float: right">
 Showing
 %if rocket_id:
@@ -137,7 +142,8 @@ Fuel level:
 </ul>
 <a href="#" id="viewmore">View more >></a>
 <div class="attrib">
-Built by <a href="http://portfolio.cincodenada.com/">Joel Bradshaw</a> aka <a href="http://www.reddit.com/user/cincodenada">cincodenada</a>
+Built by <a href="http://portfolio.cincodenada.com/">Joel Bradshaw</a> aka <a href="http://www.reddit.com/user/cincodenada">cincodenada</a><br/>
+Graphics from Andrew Garrison, with permission
 </div>
 </div>
 <a href="https://github.com/cincodenada/simplerocket_eval"><img style="position: absolute; bottom: -50; left: -50; border: 0;" src="https://camo.githubusercontent.com/52760788cde945287fbb584134c4cbc2bc36f904/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f77686974655f6666666666662e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png"></a>
