@@ -45,11 +45,31 @@ h2 { margin-top: 0px; }
     max-width: 350px;
     overflow: hidden;
 }
+#tips ul {
+    margin-bottom: 0px;
+}
 #tips li {
     margin: 5px 0px;
 }
 #tips.closed {
     height: 10px;
+}
+#tips #moretips {
+    margin-top: 0px;
+    display: none;
+}
+#tips.more #moretips {
+    display: block;
+}
+#tips #viewmore {
+    display: block;
+    text-align: right;
+}
+#tips.more #viewmore {
+    display: none;
+}
+#tips .attrib {
+    margin-top: 10px;
 }
 #zoom {
     position: absolute;
@@ -109,7 +129,16 @@ Fuel level:
     <li>Click on a part to select it.  You can then use the fuel level slider to adjust that tank's fuel.</li>
     <li>To adjust all fuel tanks at once, click on the command pod.  The slider will then adjust all tanks.</li>
 </ul>
+<ul id="moretips">
+    <li>Hold the <b>shift</b> key to select multiple parts</li>
+    <li>For minor adjustments, use the arrow keys to move selected parts around one editor grid unit at a time</li>
+    <li>You can zoom with the buttons, scroll wheel, or double-clicking</li>
+    <li>Use the dropdown menu on the upper left to select just a specific stage for evaluation</li>
+</ul>
+<a href="#" id="viewmore">View more >></a>
+<div class="attrib">
 Built by <a href="http://portfolio.cincodenada.com/">Joel Bradshaw</a> aka <a href="http://www.reddit.com/user/cincodenada">cincodenada</a>
+</div>
 </div>
 <a href="https://github.com/cincodenada/simplerocket_eval"><img style="position: absolute; bottom: -50; left: -50; border: 0;" src="https://camo.githubusercontent.com/52760788cde945287fbb584134c4cbc2bc36f904/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f77686974655f6666666666662e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png"></a>
 <script type="text/javascript" src="/js/evaluate.js"></script>

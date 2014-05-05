@@ -126,6 +126,10 @@ $(document).ready(function() {
         $(this).parent().toggleClass('closed');
     })
 
+    $('#viewmore').on('click',function(evt) {
+        $('#tips').addClass('more');
+    });
+
     $('#zoom').on('click','button',function() {
         switch(this.value) {
             case '+':
