@@ -16,11 +16,13 @@ var spritedata = {{!json.dumps(sprite_data)}};
 <style>
 #rocketview {
     height: 90%;
+    width: 100%;
 }
 body {
     background: #111 url('/img/stars_tile.jpg');
     color: white;
     font-family: sans-serif;
+    overflow: hidden;
 }
 header {
     font-weight: bold;

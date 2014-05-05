@@ -159,6 +159,16 @@ Rocket.prototype.set_stage = function(stage) {
     this.centroid = false;
 }
 
+Rocket.prototype.move_parts = function(x, y) {
+    for(var i=0; i<this.selpart.length;i++) {
+        if(this.selpart[i]) {
+            this.parts[i].data.x += x;
+            this.parts[i].data.y += y;
+        }
+    }
+    this.centroid = false;
+}
+
 
 /*
  * Rocket Part
@@ -206,6 +216,16 @@ Part.prototype.get = function(attr) {
         return this.data[attr]*2;
     default:
         return this.data[attr];
+    }
+}
+
+Part.prototype.set = function(attr, val) {
+    switch(attr) {
+    case "x":
+    case "y":
+        return this.data[attr] = val/2;
+    default:
+        return this.data[attr] = val;
     }
 }
 

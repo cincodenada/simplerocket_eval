@@ -90,6 +90,29 @@ $(document).ready(function() {
         evt.preventDefault();
     });
 
+    $('body').on('keyup', function(evt) {
+        console.log(evt.target);
+        var directions = {
+            37: [-1,0],
+            38: [0,1],
+            39: [1,0],
+            40: [0,-1],
+        }
+        var moveamt = 0.25;
+        for(keycode in directions) {
+            if(evt.which == keycode) {
+                rocket.move_parts(
+                    directions[keycode][0]*moveamt,
+                    directions[keycode][1]*moveamt
+                );
+                render();
+                evt.preventDefault();
+                evt.stopPropagation();
+                break;
+            }
+        }
+    });
+
     $('#load_button').click(function() {
         var endnums = /\d+$/;
         var shipurl = $('#load_rocket').val()
