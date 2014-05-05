@@ -10,6 +10,7 @@ function Rocket(data, dc) {
     this.curstage = 0;
 
     this.fuel_style = 'overlay';
+    this.drawmode = 'wireframe';
 
     this.spritemap = data.sprites;
     this.sprite = new Image();
@@ -259,14 +260,27 @@ Part.prototype.draw = function(with_centroid) {
     this.dc.gt().translate(this.get('x'),this.get('y'));
     this.dc.gt().rotate(this.get('editorAngle')*Math.PI/2);
 
-    //Draw sprite
-    this.dc.gt().save()
-    this.dc.gt().rotate(Math.PI);
-    this.dc.drawImage(this.rocket.sprite, 
-        this.spritedata.x, this.spritedata.y, this.spritedata.w, this.spritedata.h,
-        -this.data.size[0]/2, -this.data.size[1]/2, this.data.size[0], this.data.size[1]
-    );
-    this.dc.gt().restore()
+    switch(this.rocket.drawmode) {
+    case 'sprites':
+        //Draw sprite
+        this.dc.gt().save()
+        this.dc.gt().rotate(Math.PI);
+        this.dc.drawImage(this.rocket.sprite, 
+            this.spritedata.x, this.spritedata.y, this.spritedata.w, this.spritedata.h,
+            -this.data.size[0]/2, -this.data.size[1]/2, this.data.size[0], this.data.size[1]
+        );
+        this.dc.gt().restore()
+        break;
+    default:
+    case 'wireframe':
+        this.dc.fillStyle = "silver";
+        this.dc.strokeStyle = "black";
+        this.dc.lineWidth = 0.1;
+        this.draw_path();
+        this.dc.stroke();
+        this.dc.fill();
+        break;
+    }
 
     //Draw fuel
 	if(this.data.type == 'tank') {
@@ -296,15 +310,9 @@ Part.prototype.draw = function(with_centroid) {
 
     //If selected, make selected style
     if(this.selected()) {
-        this.dc.strokeStyle = "goldenrod";
-        this.dc.lineWidth = 0.2;
-
-        this.dc.beginPath()
-        this.dc.moveTo(this.data.shape[0][0], this.data.shape[0][1]);
-        for(var i=1;i<this.data.shape.length;i++) {
-            this.dc.lineTo(this.data.shape[i][0], this.data.shape[i][1]);
-        }
-        this.dc.closePath();
+        this.dc.strokeStyle = "blue";
+        this.dc.lineWidth = 0.3;
+        this.draw_path();
         this.dc.stroke();
     }
 
@@ -313,6 +321,15 @@ Part.prototype.draw = function(with_centroid) {
     }
 
     this.dc.gt().restore();
+}
+
+Part.prototype.draw_path = function() {
+    this.dc.beginPath()
+    this.dc.moveTo(this.data.shape[0][0], this.data.shape[0][1]);
+    for(var i=1;i<this.data.shape.length;i++) {
+        this.dc.lineTo(this.data.shape[i][0], this.data.shape[i][1]);
+    }
+    this.dc.closePath();
 }
 
 Part.prototype.draw_centroid = function() {
