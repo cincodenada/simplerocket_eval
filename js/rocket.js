@@ -158,7 +158,7 @@ Rocket.prototype.render = function() {
 }
 
 Rocket.prototype.set_stage = function(stage) {
-    this.curstage = stage;
+    this.curstage = parseInt(stage);
     this.centroid = false;
 }
 
@@ -237,7 +237,7 @@ Part.prototype.selected = function() {
 }
 
 Part.prototype.is_active = function() {
-    if(this.rocket.curstage == null) {
+    if(!this.rocket.curstage) {
         return true;
     } else {
         return (this.stage >= this.rocket.curstage);
@@ -319,6 +319,7 @@ Part.prototype.draw = function(with_centroid) {
 
 
     //If selected, make selected style
+    this.dc.fillStyle = "silver";
     if(this.selected()) {
         this.dc.strokeStyle = "blue";
         this.dc.lineWidth = 0.3;
@@ -347,7 +348,7 @@ Part.prototype.draw_centroid = function() {
     adj_mass = this.data.mass - this.data.fuel_mass*(1-this.get_fuel());
     this.dc.arc(
         this.data.centroid[0],this.data.centroid[1],
-        0.25*adj_mass,0,Math.PI*2,false
+        Math.sqrt(0.25*adj_mass/Math.PI),0,Math.PI*2,false
     );
     this.dc.fill();
 }

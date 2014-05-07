@@ -130,7 +130,7 @@ Fuel level:
 <h2>Tips:</h2>
 <ul>
     <li>Paste a ship URL in the "Load Rocket" box (or play around with the demo ship)</li>
-    <li>Red dots are centers of weight of individual parts, green X is center of weight of the whole ship</li>
+    <li>Red dots are centers of mass of individual parts, yellow X is center of mass of the whole ship</li>
     <li>Click on a part to select it.  You can then use the fuel level slider to adjust that tank's fuel.</li>
     <li>To adjust all fuel tanks at once, click on the command pod.  The slider will then adjust all tanks.</li>
 </ul>
@@ -148,5 +148,15 @@ Graphics from Andrew Garrison, with permission
 </div>
 <a href="https://github.com/cincodenada/simplerocket_eval"><img style="position: absolute; bottom: -50; left: -50; border: 0;" src="https://camo.githubusercontent.com/52760788cde945287fbb584134c4cbc2bc36f904/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f77686974655f6666666666662e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png"></a>
 <script type="text/javascript" src="/js/evaluate.js"></script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-XXXXXX-XX', 'example.com');
+  ga('send', 'pageview');
+
+</script>
 </body>
 </html>

@@ -24,6 +24,8 @@ class PartsBin:
         return self.part_dict[idx]
 
 class Ship:
+    maxdepth = 5000
+
     def __init__(self, partsbin):
         self.partsbin = partsbin
         self.partlist = []
@@ -90,7 +92,7 @@ class Ship:
                     elif(pod_id in sides[1]):
                         pod_parts.extend(sides[1])
                         cur_parts.extend(sides[0])
-                else:
+                elif(sides[0] or sides[1]):
                     cur_parts.extend(sides[0] if sides[0] else sides[1])
             stage_parts.append(list(set(cur_parts)))
             curstage += 1
@@ -100,7 +102,7 @@ class Ship:
         return stage_parts
 
     def getCurrentStage(self, from_id, part_pool, cur_detacher, curstage, depth):
-        if(depth > 50):
+        if(depth > self.maxdepth):
             return False
 
         parents = self.tree.findall("./Connections/Connection[@childPart='%s']" % (from_id))
