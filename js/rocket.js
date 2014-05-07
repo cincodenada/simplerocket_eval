@@ -4,6 +4,7 @@
 function Rocket(data, dc) {
     this.partslist = data.parts;
     this.stagedata = data.stages;
+    this.numstages = this.stagedata.parts.length;
     this.dc = dc;
     this.engine_fuel = [1];
     this.selpart = [];
@@ -16,6 +17,22 @@ function Rocket(data, dc) {
     this.spritemap = data.sprites;
     this.sprite = new Image();
     this.sprite.src = data.spriteurl;
+
+    //After some empirical calculations, I am assuming that the 
+    //numbers in the engines (425, 170, 85) are the thrust
+    //force in kilonewtons.  Using F = Ve*m, I calculated
+    //Ve = F/m for the various engines, and for the three
+    //largest Ve was consistently 3400.  Using Ve=g0*Isp,
+    //given g0 of 9.798 (from SmolarSystem.xml), we can find Isp. 
+    //Note: The Tiny 21 is actually 21.25kN, and its consumption
+    //is lower than I would expect (should be ~6), so it's Isp may
+    //be different.  DeltaVs may not be accurate for it yet.
+    this.Ve = 3400;
+    this.g0 = 9.798;
+    this.Isp = this.Ve/this.Isp
+
+    this.stagedata.deltaV = false;
+    this.centroid = false;
 
     //Build parts list
     this.parts = [];
@@ -66,8 +83,7 @@ Rocket.prototype.set_fuel = function(value) {
 		}
 		if(!anysel) { this.engine_fuel = [value]; }
 	}
-    //Clear cached centroid
-    this.centroid = false;
+    this.clear_calculated();
 }
 
 Rocket.prototype.draw_centroid = function() {
@@ -159,7 +175,7 @@ Rocket.prototype.render = function() {
 
 Rocket.prototype.set_stage = function(stage) {
     this.curstage = parseInt(stage);
-    this.centroid = false;
+    this.clear_calculated(false);
 }
 
 Rocket.prototype.move_parts = function(x, y) {
@@ -169,7 +185,50 @@ Rocket.prototype.move_parts = function(x, y) {
             this.parts[i].data.y += y;
         }
     }
+    this.clear_calculated(false);
+}
+
+Rocket.prototype.deltaV = function(stage) {
+    if(!this.stagedata.deltaV) {
+        stage_masses = [];
+        final_masses = [];
+        for(var s=0;s<this.numstages;s++) {
+            stage_masses[s] = 0;
+            final_masses[s] = 0;
+        }
+        for(var idx in this.parts) {
+            part = this.parts[idx];
+            for(var s=0;s<=part.stage;s++) {
+                var curmass = part.get_mass();
+                stage_masses[s] += curmass;
+                final_masses[s] += curmass;
+            }
+            if(part.data.type=="tank" && part.data.category != 'Satellite') {
+                final_masses[part.stage] -= part.get_fuel_mass()
+            }
+        }
+
+        this.stagedata.deltaV = [];
+        for(var s=0; s<this.numstages;s++) {
+            //Tsiolkovsky rocket equation
+            this.stagedata.deltaV[s] =
+                this.Ve*Math.log(stage_masses[s]/final_masses[s])/Math.log(2);
+        }
+    }
+
+    if(typeof stage == 'undefined') {
+        return this.stagedata.deltaV;
+    } else {
+        return this.stagedata.deltaV[stage];
+    }
+}
+
+Rocket.prototype.clear_calculated = function(stagedata) {
+    if(typeof stagedata == 'undefined') { stagedata = true; }
     this.centroid = false;
+    if(stagedata) {
+        this.stagedata.deltaV = false;
+    }
 }
 
 
@@ -185,6 +244,7 @@ function Part(rocket, idx) {
 
     //Find our stage
     if(this.rocket.stagedata.detachers.length == 0) {
+        //If we have no detachers, everything is stage 0
         this.stage = 0;
     } else {
         if(this.data.type == 'detacher') {
@@ -370,4 +430,8 @@ Part.prototype.get_mass = function() {
 
 Part.prototype.get_fuel = function() {
     return this.rocket.get_fuel(this.idx);
+}
+
+Part.prototype.get_fuel_mass = function() {
+    return this.data.fuel_mass*this.get_fuel();
 }

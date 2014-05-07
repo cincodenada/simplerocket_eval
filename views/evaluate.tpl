@@ -33,16 +33,32 @@ header {
 }
 input { opacity: 0.5; }
 button { opacity: 0.75; }
-a { text-decoration: none; }
-h2 { margin-top: 0px; }
+a { 
+    color: gray;
+}
+a:hover {
+    color: silver;
+}
+h2, h3 { margin-top: 0px; }
+.infobox {
+    border: 2px solid darkgray;
+    padding: 10px;
+    background: rgba(0,0,0,0.75);
+}
+.infobox.light {
+    background: rgba(255,255,255,0.75);
+    color: #333;
+}
+.infobox.light a {
+    color: #4f4f4f;
+}
+.infobox.light a:hover {
+    color: #666;
+}
 #tips {
     position: absolute;
     bottom: 0px;
     right: 0px;
-    background: rgba(255,255,255,0.75);
-    border: 2px solid darkgray;
-    padding: 10px;
-    color: #333;
     max-width: 350px;
     overflow: hidden;
 }
@@ -94,59 +110,74 @@ h2 { margin-top: 0px; }
     border-top: none;
     border-bottom: 10px solid black;
 }
+
+#mainbody { 
+    position: relative;
+}
+#stats {
+    position: absolute;
+    top: 10px;
+    left: 0px;
+}
 </style>
 </head>
 <body>
 <header>
-Load rocket: <input type="text" id="load_rocket"/><button id="load_button">Load</button>
-<select id="stage" name="stage" disabled>
-<option value="1">Stage 1</option>
-</select>
-<label>
-<input type="checkbox" id="evaluate" checked="checked"/>
-Show detailed analysis
-</label>
-<span style="float: right">
-Showing
-%if rocket_id:
-rocket {{rocket_id}}:
-%else:
-demo rocket
-%end
-</span>
-<br/>
-Fuel level:
-<div id="fuelslider"></div>
+    Load rocket: <input type="text" id="load_rocket"/><button id="load_button">Load</button>
+    <select id="stage" name="stage" disabled>
+        <option value="1">Stage 1</option>
+    </select>
+    <label>
+        <input type="checkbox" id="evaluate" checked="checked"/>
+        Show detailed analysis
+    </label>
+    <span style="float: right">
+        Showing
+    %if rocket_id:
+        rocket {{rocket_id}}
+        | <a href="http://jundroo.com/ViewShip.html?id={{rocket_id}}" target="_blank">Download</a>
+    %else:
+        demo rocket
+        | <a href="http://jundroo.com/ViewShip.html?id=119304" target="_blank">Download</a>
+    %end
+    </span>
+    <br/>
+    Fuel level:
+    <div id="fuelslider"></div>
 </header>
-<canvas id="rocketview" width="100" height="50">
-</canvas>
-<div id="zoom">
-<button value="+">+</button>
-<button value="reset">Reset</button>
-<button value="-">–</button>
+<div id="mainbody">
+    <div id="stats" class="infobox">
+    </div>
+    <canvas id="rocketview" width="100" height="50">
+    </canvas>
+    <div id="zoom">
+        <button value="+">+</button>
+        <button value="reset">Reset</button>
+        <button value="-">–</button>
+    </div>
+    <div id="tips" class="infobox light">
+        <a href="#" class="closebtn"></a>
+        <h2>Tips:</h2>
+        <ul>
+            <li>Paste a ship URL in the "Load Rocket" box (or play around with the demo ship)</li>
+            <li>Red dots are centers of mass of individual parts, yellow X is center of mass of the whole ship</li>
+            <li>Click on a part to select it.  You can then use the fuel level slider to adjust that tank's fuel.</li>
+            <li>To adjust all fuel tanks at once, click on the command pod.  The slider will then adjust all tanks.</li>
+        </ul>
+        <ul id="moretips">
+            <li>Hold the <b>shift</b> key to select multiple parts</li>
+            <li>For minor adjustments, use the arrow keys to move selected parts around one editor grid unit at a time</li>
+            <li>You can zoom with the buttons, scroll wheel, or double-clicking</li>
+            <li>Use the dropdown menu on the upper left to select just a specific stage for evaluation</li>
+        </ul>
+        <a href="#" id="viewmore">View more >></a>
+        <div class="attrib">
+            Built by <a href="http://portfolio.cincodenada.com/">Joel Bradshaw</a> aka <a href="http://www.reddit.com/user/cincodenada">cincodenada</a><br/>
+            Graphics from Andrew Garrison, with permission
+        </div>
+    </div>
+    <a href="https://github.com/cincodenada/simplerocket_eval"><img style="position: absolute; bottom: -50; left: -50; border: 0;" src="https://camo.githubusercontent.com/52760788cde945287fbb584134c4cbc2bc36f904/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f77686974655f6666666666662e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png"></a>
 </div>
-<div id="tips">
-<a href="#" class="closebtn"></a>
-<h2>Tips:</h2>
-<ul>
-    <li>Paste a ship URL in the "Load Rocket" box (or play around with the demo ship)</li>
-    <li>Red dots are centers of mass of individual parts, yellow X is center of mass of the whole ship</li>
-    <li>Click on a part to select it.  You can then use the fuel level slider to adjust that tank's fuel.</li>
-    <li>To adjust all fuel tanks at once, click on the command pod.  The slider will then adjust all tanks.</li>
-</ul>
-<ul id="moretips">
-    <li>Hold the <b>shift</b> key to select multiple parts</li>
-    <li>For minor adjustments, use the arrow keys to move selected parts around one editor grid unit at a time</li>
-    <li>You can zoom with the buttons, scroll wheel, or double-clicking</li>
-    <li>Use the dropdown menu on the upper left to select just a specific stage for evaluation</li>
-</ul>
-<a href="#" id="viewmore">View more >></a>
-<div class="attrib">
-Built by <a href="http://portfolio.cincodenada.com/">Joel Bradshaw</a> aka <a href="http://www.reddit.com/user/cincodenada">cincodenada</a><br/>
-Graphics from Andrew Garrison, with permission
-</div>
-</div>
-<a href="https://github.com/cincodenada/simplerocket_eval"><img style="position: absolute; bottom: -50; left: -50; border: 0;" src="https://camo.githubusercontent.com/52760788cde945287fbb584134c4cbc2bc36f904/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f77686974655f6666666666662e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png"></a>
 <script type="text/javascript" src="/js/evaluate.js"></script>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

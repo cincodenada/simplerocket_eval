@@ -2,6 +2,7 @@ $(document).ready(function() {
     //Set up canvas
     var scale = 10;
     var scalestep = 0.25;
+    var deltasV = null;    //Cached
 
     CanvasRenderingContext2D.prototype.drawX = function(x,y,hairsize) {
         this.beginPath()
@@ -40,7 +41,7 @@ $(document).ready(function() {
         'spriteurl': '/img/sprites/ShipSprites.png'
     }, ctx);
     rocket.sprite.onload = function() {
-        rocket.render();
+        render();
     };
 
     slidermax = 10000;
@@ -188,6 +189,36 @@ $(document).ready(function() {
         ctx.gt().restore();
 
         rocket.render();
+        update_deltaV();
+    }
+
+    function update_deltaV() {
+        var lastV = deltasV;
+        deltasV = rocket.deltaV();
+        var is_same = true;
+        if(lastV == null) {
+            is_same = false;
+        } else {
+            for(var s=0; s<deltasV.length;s++) { 
+                if(lastV[s] != deltasV[s]) { is_same = false; } 
+            }
+        }
+
+        if(!is_same || lastV == null) {
+            $stats = $('#stats');
+            $stats.empty();
+            $stats.append('<h3>Δv (beta!):</h3>');
+            totalDv = 0;
+            for(var s=0; s<deltasV.length;s++) {
+                $stats.append('Stage ' + (s+1) + ': ' + dv_text(deltasV[s]) + '<br/>');
+                totalDv += deltasV[s];
+            }
+            $stats.append('Total: ' + dv_text(totalDv));
+        }
+    }
+
+    function dv_text(val) {
+        return Math.round(val*100)/100 + ' m/s'
     }
 
     function getCanvasPoint(mouseevt) {

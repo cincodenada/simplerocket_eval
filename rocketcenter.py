@@ -1,13 +1,17 @@
-from bottle import route, run, template, view, static_file, default_app
+from bottle import route, run, template, view, static_file, default_app, request
 import json
 import simplerockets as sr
 import os
 
 @route('/evaluate/<rocket_id:int>')
 @route('/evaluate/')
+@route('/evaluate')
 @route('/')
 @view('evaluate')
 def evaluate(rocket_id = None):
+    if(request.query.get('id')):
+        rocket_id = request.query.get('id')
+
     ship = partbin.getShip()
     if(rocket_id):
         ship.loadRemoteShip(rocket_id)
