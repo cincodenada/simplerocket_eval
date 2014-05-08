@@ -51,6 +51,10 @@ class Ship:
             self.error_type = "FileLoad"
             self.error = "Error loading file"
             return False
+        except:
+            self.error_type = "FileLoad"
+            self.error = "Unknown error loading file"
+            return False
 
     def parseFile(self, tree):
         self.partlist = []
@@ -63,8 +67,17 @@ class Ship:
             self.stage_parts = self.findStages()
         except KeyError:
             self.error_type = "FileParse"
-            self.error = "Error reading ship file.  The most likely cause is the ship using parts from a mod that the parser isn't familiar with."
+            self.error = "Error reading ship file.  The most likely cause is the ship using parts from a mod that the parser isn't familiar with, or if it was simply too big for the parser as-is."
             return False
+        except MemoryError:
+            self.error_type = "FileParse"
+            self.error = "Ran out of memory loading your ship.  This is likely because you have lots of stages/detachers, and my parser isn't very good at that yet.  Sorry - I'm working on it!"
+            return False
+        except:
+            self.error_type = "FileParse"
+            self.error = "Unknown error reading ship file.  Get me a ship ID and I can look through my error logs."
+            return False
+
 
     def findStages(self):
         steps = self.tree.findall("./Parts/Part/Pod/Staging/Step")
