@@ -13,15 +13,16 @@ def evaluate(rocket_id = None):
         rocket_id = request.query.get('id')
 
     ship = partbin.getShip()
-    try:
-        if(rocket_id):
-            ship.loadRemoteShip(rocket_id)
-        else:
-            ship.loadFile('OrbiterFull.xml')
-    except sr.ET.ParseError, IOError:
-        pass
+    if(rocket_id):
+        ship.loadRemoteShip(rocket_id)
+    else:
+        ship.loadFile('OrbiterFull.xml')
 
     return {
+        'error_info': {
+            'error': ship.error,
+            'type': ship.error_type,
+        },
         'rocket_id': rocket_id,
         'rocket_data': ship.partlist,
         'stage_data': {

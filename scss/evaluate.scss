@@ -28,6 +28,7 @@ h2, h3 { margin-top: 0px; }
   border: 2px solid darkgray;
   padding: 10px;
   background: rgba(0,0,0,0.75);
+  overflow: hidden;
   &.light {
     background: rgba(255,255,255,0.75);
     color: #333;
@@ -38,9 +39,17 @@ h2, h3 { margin-top: 0px; }
       }
     }
   }
+  &.closed {
+    height: 20px;
+  }
+
   &.error {
     background: rgba(255,0,0,0.75);
     border: 2px solid #660000;
+    &.closed {
+			left: initial !important;
+			right: 0px;
+    }
   }
 }
 #tips {
@@ -48,15 +57,11 @@ h2, h3 { margin-top: 0px; }
   bottom: 0px;
   right: 0px;
   max-width: 350px;
-  overflow: hidden;
   ul {
     margin-bottom: 0px;
   }
   li {
     margin: 5px 0px;
-  }
-  &.closed {
-    height: 10px;
   }
   #moretips {
     margin-top: 0px;

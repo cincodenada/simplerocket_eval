@@ -31,23 +31,40 @@ class Ship:
         self.partlist = []
         self.stage_parts = []
         self.detacher_list = []
+        self.error = None
+        self.error_type = None
 
     def loadFile(self, xmlfile):
-        return self.parseFile(ET.parse(xmlfile));
+        try:
+            return self.parseFile(ET.parse(xmlfile));
+        except ET.ParseError, IOError:
+            self.error_type = "FileLoad"
+            self.error = "Error loading file"
+            return False
 
     def loadRemoteShip(self, shipid):
-        shipfile = requests.get(ship_url % (int(shipid)))
-        #TODO: Perhaps .parse() with ship.raw?
-        return self.parseFile(ET.fromstring(shipfile.text))
+        try:
+            shipfile = requests.get(ship_url % (int(shipid)))
+            #TODO: Perhaps .parse() with ship.raw?
+            return self.parseFile(ET.fromstring(shipfile.text))
+        except ET.ParseError, IOError:
+            self.error_type = "FileLoad"
+            self.error = "Error loading file"
+            return False
 
     def parseFile(self, tree):
         self.partlist = []
         self.tree = tree
-        parts = tree.findall('./Parts/Part')
-        for p in parts:
-            newpart = PartInstance(p, self)
-            self.partlist.append(newpart.get_dict())
-        self.stage_parts = self.findStages()
+        try:
+            parts = tree.findall('./Parts/Part')
+            for p in parts:
+                newpart = PartInstance(p, self)
+                self.partlist.append(newpart.get_dict())
+            self.stage_parts = self.findStages()
+        except KeyError:
+            self.error_type = "FileParse"
+            self.error = "Error reading ship file.  The most likely cause is the ship using parts from a mod that the parser isn't familiar with."
+            return False
 
     def findStages(self):
         steps = self.tree.findall("./Parts/Part/Pod/Staging/Step")

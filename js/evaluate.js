@@ -44,8 +44,8 @@ $(document).ready(function() {
         render();
     };
 
-    if(rocketdata.length == 0) {
-        $('#errorbox').html(
+    if(error_info.error) {
+        $('#errorbox .message').html(
             '<h2>Error loading rocket!</h2>' +
             '<p>We had trouble either parsing your rocket, ' +
             'or getting it from the server in the first place. ' +
@@ -54,7 +54,9 @@ $(document).ready(function() {
             '<p>Perhaps try again later, or if the ship loads fine ' +
             'in SimpleRockets, <a href="http://www.reddit.com/message/compose/?to=cincodenada">send me a message</a> ' +
             'with your rocket ID or URL and I\'ll take a look.</p>'
-        ).show();
+        ).append(
+            '<p>Error type: ' + error_info.type + '<br/>' + error_info.error + '</p>'
+        ).parent().show();
     }
 
     slidermax = 10000;
