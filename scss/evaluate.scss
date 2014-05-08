@@ -1,0 +1,126 @@
+/* vim: set ts=2 sw=2 sts=2 noet! : */
+#rocketview {
+  height: 90%;
+  width: 100%;
+}
+body {
+  background: #111 url('/img/stars_tile.jpg');
+  color: white;
+  font-family: sans-serif;
+  overflow: hidden;
+}
+header {
+  font-weight: bold;
+  line-height: 1.5em;
+  text-shadow: 1px 1px #333; 
+  padding: 0px 10px;
+}
+input { opacity: 0.5; }
+button { opacity: 0.75; }
+a { 
+  color: gray;
+  &:hover {
+    color: silver;
+  }
+}
+h2, h3 { margin-top: 0px; }
+.infobox {
+  border: 2px solid darkgray;
+  padding: 10px;
+  background: rgba(0,0,0,0.75);
+  &.light {
+    background: rgba(255,255,255,0.75);
+    color: #333;
+    a {
+      color: #4f4f4f;
+      &:hover {
+        color: #666;
+      }
+    }
+  }
+  &.error {
+    background: rgba(255,0,0,0.75);
+    border: 2px solid #660000;
+  }
+}
+#tips {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  max-width: 350px;
+  overflow: hidden;
+  ul {
+    margin-bottom: 0px;
+  }
+  li {
+    margin: 5px 0px;
+  }
+  &.closed {
+    height: 10px;
+  }
+  #moretips {
+    margin-top: 0px;
+    display: none;
+  }
+  #viewmore {
+    display: block;
+    text-align: right;
+  }
+  &.more { 
+    #moretips {
+      display: block;
+    }
+    #viewmore {
+      display: none;
+    }
+  }
+  .attrib {
+    margin-top: 10px;
+  }
+}
+#zoom {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  text-align: center;
+  width: 100%;
+  button {
+    font-size: 150%;
+    font-weight: bold;
+  }
+}
+.closebtn {
+  border-top: 10px solid black;
+  border-right: 10px solid transparent;
+  border-left: 10px solid transparent;
+  display: inline-block;
+  float: right;
+}
+.closed .closebtn {
+  border-top: none;
+  border-bottom: 10px solid black;
+}
+
+#mainbody { 
+  position: relative;
+}
+#stats {
+  position: absolute;
+  top: 10px;
+  left: 0px;
+}
+
+#errorbox {
+  display: none;
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  margin-left: -150px;
+  width: 300px;
+  a {
+    color: black;
+    &:hover {
+      color: silver;
+    }
+  }
+}

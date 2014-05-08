@@ -24,11 +24,13 @@ class PartsBin:
         return self.part_dict[idx]
 
 class Ship:
-    maxdepth = 5000
+    maxdepth = 100
 
     def __init__(self, partsbin):
         self.partsbin = partsbin
         self.partlist = []
+        self.stage_parts = []
+        self.detacher_list = []
 
     def loadFile(self, xmlfile):
         return self.parseFile(ET.parse(xmlfile));
@@ -60,7 +62,6 @@ class Ship:
             if(len(cur_detachers)):
                 stages.append(cur_detachers)
 
-        self.detacher_list = []
         for s in range(len(stages)):
             good = []
             bad = []

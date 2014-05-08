@@ -44,6 +44,19 @@ $(document).ready(function() {
         render();
     };
 
+    if(rocketdata.length == 0) {
+        $('#errorbox').html(
+            '<h2>Error loading rocket!</h2>' +
+            '<p>We had trouble either parsing your rocket, ' +
+            'or getting it from the server in the first place. ' +
+            'The link may have expired, or the servers may be ' +
+            'having issues.</p>' +
+            '<p>Perhaps try again later, or if the ship loads fine ' +
+            'in SimpleRockets, <a href="http://www.reddit.com/message/compose/?to=cincodenada">send me a message</a> ' +
+            'with your rocket ID or URL and I\'ll take a look.</p>'
+        ).show();
+    }
+
     slidermax = 10000;
     $('#fuelslider').slider({
         min: 0,

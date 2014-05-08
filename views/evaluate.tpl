@@ -14,112 +14,7 @@ var spritedata = {{!json.dumps(sprite_data)}};
 <script type="text/javascript" src="/js/jquery.event.drag-2.2.js"></script>
 <script type="text/javascript" src="/js/jquery.mousewheel.min.js"></script>
 <script type="text/javascript" src="/js/transform-tracker.js"></script>
-<style>
-#rocketview {
-    height: 90%;
-    width: 100%;
-}
-body {
-    background: #111 url('/img/stars_tile.jpg');
-    color: white;
-    font-family: sans-serif;
-    overflow: hidden;
-}
-header {
-    font-weight: bold;
-    line-height: 1.5em;
-    text-shadow: 1px 1px #333; 
-    padding: 0px 10px;
-}
-input { opacity: 0.5; }
-button { opacity: 0.75; }
-a { 
-    color: gray;
-}
-a:hover {
-    color: silver;
-}
-h2, h3 { margin-top: 0px; }
-.infobox {
-    border: 2px solid darkgray;
-    padding: 10px;
-    background: rgba(0,0,0,0.75);
-}
-.infobox.light {
-    background: rgba(255,255,255,0.75);
-    color: #333;
-}
-.infobox.light a {
-    color: #4f4f4f;
-}
-.infobox.light a:hover {
-    color: #666;
-}
-#tips {
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    max-width: 350px;
-    overflow: hidden;
-}
-#tips ul {
-    margin-bottom: 0px;
-}
-#tips li {
-    margin: 5px 0px;
-}
-#tips.closed {
-    height: 10px;
-}
-#tips #moretips {
-    margin-top: 0px;
-    display: none;
-}
-#tips.more #moretips {
-    display: block;
-}
-#tips #viewmore {
-    display: block;
-    text-align: right;
-}
-#tips.more #viewmore {
-    display: none;
-}
-#tips .attrib {
-    margin-top: 10px;
-}
-#zoom {
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
-    text-align: center;
-    width: 100%;
-}
-#zoom button {
-    font-size: 150%;
-    font-weight: bold;
-}
-.closebtn {
-    border-top: 10px solid black;
-    border-right: 10px solid transparent;
-    border-left: 10px solid transparent;
-    display: inline-block;
-    float: right;
-}
-.closed .closebtn {
-    border-top: none;
-    border-bottom: 10px solid black;
-}
-
-#mainbody { 
-    position: relative;
-}
-#stats {
-    position: absolute;
-    top: 10px;
-    left: 0px;
-}
-</style>
+<link rel="stylesheet" href="/css/evaluate.css"/>
 </head>
 <body>
 <header>
@@ -146,6 +41,8 @@ h2, h3 { margin-top: 0px; }
     <div id="fuelslider"></div>
 </header>
 <div id="mainbody">
+    <div id="errorbox" class="infobox error">
+    </div>
     <div id="stats" class="infobox">
     </div>
     <canvas id="rocketview" width="100" height="50">
