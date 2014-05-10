@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ET
 from polyfunc import SimplePoly
 import requests
+import sys
+import os
 
 ship_url = 'http://jundroo.com/service/SimpleRockets/DownloadRocket?id=%d'
 
@@ -25,6 +27,7 @@ class PartsBin:
 
 class Ship:
     maxdepth = 100
+    cache_dir = 'cache'
 
     def __init__(self, partsbin):
         self.partsbin = partsbin
@@ -34,37 +37,31 @@ class Ship:
         self.error = None
         self.error_type = None
 
-    def loadFile(self, xmlfile):
-        try:
-            return self.parseFile(ET.parse(xmlfile));
-        except ET.ParseError, IOError:
-            self.error_type = "FileLoad"
-            self.error = "Error loading file"
-            return False
+    def set_cachedir(self, newdir):
+        self.cachedir = newdir
 
-    def loadRemoteShip(self, shipid):
-        try:
-            shipfile = requests.get(ship_url % (int(shipid)))
-            #TODO: Perhaps .parse() with ship.raw?
-            return self.parseFile(ET.fromstring(shipfile.text))
-        except ET.ParseError, IOError:
-            self.error_type = "FileLoad"
-            self.error = "Error loading file"
-            return False
-        except:
-            self.error_type = "FileLoad"
-            self.error = "Unknown error loading file"
-            return False
+    def get_cachepath(self, shipid):
+        return os.path.join(self.cache_dir, '%d.xml' % (shipid))
 
-    def parseFile(self, tree):
-        self.partlist = []
-        self.tree = tree
+    def load(self, fromwhat):
         try:
-            parts = tree.findall('./Parts/Part')
-            for p in parts:
-                newpart = PartInstance(p, self)
-                self.partlist.append(newpart.get_dict())
-            self.stage_parts = self.findStages()
+            try:
+                shipid = int(fromwhat)
+                #Try loading from cache
+                print "Trying cache..."
+                try:
+                    self.loadFile(self.get_cachepath(shipid))
+                    print "Loaded from cache."
+                except (ET.ParseError, IOError):
+                    print "Cache failed, getting live..."
+                    self.loadRemoteShip(shipid)
+            except ValueError:
+                self.loadFile(fromwhat)
+
+        except (ET.ParseError, IOError), e:
+            self.error_type = "FileLoad"
+            self.error = "Error loading file: " + str(e)
+            return False
         except KeyError:
             self.error_type = "FileParse"
             self.error = "Error reading ship file.  The most likely cause is the ship using parts from a mod that the parser isn't familiar with, or if it was simply too big for the parser as-is."
@@ -73,11 +70,37 @@ class Ship:
             self.error_type = "FileParse"
             self.error = "Ran out of memory loading your ship.  This is likely because you have lots of stages/detachers, and my parser isn't very good at that yet.  Sorry - I'm working on it!"
             return False
-        except:
-            self.error_type = "FileParse"
-            self.error = "Unknown error reading ship file.  Get me a ship ID and I can look through my error logs."
+        except Exception, e:
+            self.error_type = "Unknown"
+            self.error = "Unknown error loading ship file.  Get me a ship ID and I can look through my error logs.  Details: " + str(e)
             return False
 
+        return True
+
+    def loadFile(self, xmlfile):
+        self.parseFile(ET.parse(xmlfile));
+
+    def loadRemoteShip(self, shipid):
+        shipfile = requests.get(ship_url % (int(shipid)))
+        #Try saving to cache
+        try:
+            with open(self.get_cachepath(shipid), 'wb') as fd:
+                fd.write(shipfile.content)
+                fd.close()
+        except IOError:
+            print "Failed to cache ship!"
+
+        self.parseFile(ET.fromstring(shipfile.text))
+
+    def parseFile(self, tree):
+        self.detacher_list = []
+        self.partlist = []
+        self.tree = tree
+        parts = tree.findall('./Parts/Part')
+        for p in parts:
+            newpart = PartInstance(p, self)
+            self.partlist.append(newpart.get_dict())
+        self.stage_parts = self.findStages()
 
     def findStages(self):
         steps = self.tree.findall("./Parts/Part/Pod/Staging/Step")

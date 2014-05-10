@@ -13,10 +13,12 @@ def evaluate(rocket_id = None):
         rocket_id = request.query.get('id')
 
     ship = partbin.getShip()
+    ship.set_cachedir(os.path.join(os.getcwd(),'cache'))
+    
     if(rocket_id):
-        ship.loadRemoteShip(rocket_id)
+        ship.load(rocket_id)
     else:
-        ship.loadFile('OrbiterFull.xml')
+        ship.load('OrbiterFull.xml')
 
     return {
         'error_info': {
@@ -32,8 +34,8 @@ def evaluate(rocket_id = None):
         'sprite_data': shipsprites.get_dict(),
     }
 
-@route('/<type:re:(js|css|img)>/<filename>')
-@route('/<type:re:(js|css|img)>/<subdir:path>/<filename>')
+@route('/<type:re:(js|css|img|cache)>/<filename>')
+@route('/<type:re:(js|css|img|cache)>/<subdir:path>/<filename>')
 def server_static(type, filename, subdir = ''):
     return static_file(os.path.join(type, subdir, filename),'./')
 
