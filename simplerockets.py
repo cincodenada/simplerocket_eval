@@ -13,11 +13,11 @@ class PartsBin:
         self.fuel_mass_per_liter = 0.002
 
         #Parse the PartsList XML
-        parts_xml = ET.ElementTree()
-        parts_xml.parse(xmlfile)
+        self.tree = ET.ElementTree()
+        self.tree.parse(xmlfile)
 
         #Fucking namespaces...
-        for part in parts_xml.findall('./*'):
+        for part in self.tree.findall('./*'):
             self.part_dict[part.get('id')] = ShipPart(part, self)
 
     def getShip(self):
@@ -100,6 +100,7 @@ class Ship:
         parts = tree.findall('./Parts/Part')
         for p in parts:
             newpart = PartInstance(p, self)
+            newpart.adjust()
             self.partlist.append(newpart.get_dict())
         self.stage_parts = self.findStages()
 
@@ -200,6 +201,8 @@ class PartInstance:
         self.elem = element
         self.ship = ship
         self.part = ship.partsbin[self.elem.get('partType')]
+        self.parent = ship.tree.find("./Connections/Connection[@childPart='%s']" % (self['id']))
+        self.children = ship.tree.findall("./Connections/Connection[@parentPart='%s']" % (self['id']))
 
     def get_dict(self):
         retdict = self.part.get_dict()
@@ -209,9 +212,17 @@ class PartInstance:
         })
         return retdict
 
-    def __dict__():
-        return retdict
+    def __dict__(self):
+        return self.get_dict()
 
+    def __getitem__(self, key):
+        return self.elem.get(key)
+
+    def adjust(self):
+        #Flip lander struts for display
+        if(self.part['type'] == 'lander'):
+            if((self.parent is not None) and int(self.parent.get('childAttachPoint')) == 1):
+                self.elem.set('flippedX',1-int(self['flippedX']))
 
 class ShipPart:
     centroid = None
