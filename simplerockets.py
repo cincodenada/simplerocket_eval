@@ -109,8 +109,8 @@ class Ship:
             cur_detachers = []
             for part in s.findall("./Activate"):
                 relpart = self.tree.find("./Parts/Part[@id='%s']" % (part.get('Id')))
-                nameparts = relpart.get('partType').split('-',2)
-                if(nameparts[0] == 'detacher'):
+                part_type = self.partsbin[relpart.get('partType')]['type']
+                if(part_type == 'detacher'):
                     cur_detachers.append(relpart.get('id'))
             if(len(cur_detachers)):
                 stages.append(cur_detachers)
@@ -119,7 +119,7 @@ class Ship:
             good = []
             bad = []
             for subs in range(len(stages)):
-                if(subs < s):
+                if(subs <= s):
                     good.extend(stages[subs])
                 else:
                     bad.extend(stages[subs])
@@ -127,27 +127,39 @@ class Ship:
 
         curstage = 0
         pod_id = self.tree.find("./Parts/Part[@partType='pod-1']").get('id')
+        findresult = [[],[]]
+
         stage_parts = []
         pod_parts = []
         for s in stages:
-            print "Next stage..."
+            #print "Next stage..."
+            #print str(s)
             cur_parts = []
             for d in s:
-                parent = self.tree.find("./Connections/Connection[@childPart='%s']" % (d))
-                child = self.tree.find("./Connections/Connection[@parentPart='%s']" % (d))
-                sides = [
-                    self.getCurrentStage(parent.get('parentPart'), [], d, curstage,0),
-                    self.getCurrentStage(child.get('childPart'), [], d, curstage,0)
-                ]
-                if(sides[0] and sides[1]):
-                    if(pod_id in sides[0]):
-                        pod_parts.extend(sides[0])
-                        cur_parts.extend(sides[1])
-                    elif(pod_id in sides[1]):
-                        pod_parts.extend(sides[1])
-                        cur_parts.extend(sides[0])
-                elif(sides[0] or sides[1]):
-                    cur_parts.extend(sides[0] if sides[0] else sides[1])
+                sidebin = [[],[]]
+                findresult[0] = [self.tree.find("./Connections/Connection[@childPart='%s']" % (d)).get('parentPart')]
+                findresult[1] = [self.tree.find("./Connections/Connection[@parentPart='%s']" % (d)).get('childPart')]
+                #print str(findresult)
+                #print str(d)
+                cycle = 0
+                while(findresult[0] or findresult[1]):
+                    if(findresult[0]):
+                        findresult[0] = self.getMoreParts(findresult[0], sidebin[0], curstage, cycle)
+                    if(findresult[1]):
+                        findresult[1] = self.getMoreParts(findresult[1], sidebin[1], curstage, cycle)
+                    cycle += 1
+
+                #print str(sidebin)
+
+                if(findresult[0] != False and sidebin[1] != False):
+                    if(pod_id in sidebin[0]):
+                        pod_parts.extend(sidebin[0])
+                        cur_parts.extend(sidebin[1])
+                    elif(pod_id in sidebin[1]):
+                        pod_parts.extend(sidebin[1])
+                        cur_parts.extend(sidebin[0])
+                elif(findresult[0] != False or findresult[1] != False):
+                    cur_parts.extend(sidebin[0] if (findresult[0] != False) else sidebin[1])
             stage_parts.append(list(set(cur_parts)))
             curstage += 1
 
@@ -155,36 +167,32 @@ class Ship:
 
         return stage_parts
 
-    def getCurrentStage(self, from_id, part_pool, cur_detacher, curstage, depth):
-        if(depth > self.maxdepth):
-            return False
+    def getMoreParts(self, from_ids, part_pool, curstage, depth):
+        #print " "*depth + "Examining parts %s..." % (','.join(from_ids))
+        part_pool.extend(from_ids)
+        #print part_pool
+        next_parts = []
 
-        parents = self.tree.findall("./Connections/Connection[@childPart='%s']" % (from_id))
-        parent_ids = [p.get('parentPart') for p in parents]
-        children = self.tree.findall("./Connections/Connection[@parentPart='%s']" % (from_id))
-        child_ids = [c.get('childPart') for c in children]
-
-        part_pool.append(from_id)
-        #print " "*depth + "Found parts connected to %s..." % (from_id)
-        for connected in (parent_ids + child_ids):
-            if((connected in part_pool) or (connected == cur_detacher)):
-                #print " "*depth + "Already dealt with part %s" % (connected)
-                continue
-            elif(connected in self.detacher_list[curstage][0]):
-                #print " "*depth + "Part %s is previous connector, ignoring" % (connected)
-                continue
-            elif(connected in self.detacher_list[curstage][1]):
-                #print " "*depth + "Part %s is new connector, collapsing!" % (connected)
-                return False
-            else:
-                #print " "*depth + "Part %s looks good, adding..." % (connected)
-                new_parts = self.getCurrentStage(connected, part_pool, cur_detacher, curstage, depth+1)
-                if(new_parts):
-                    part_pool.extend(new_parts)
-                else:
+        for curid in from_ids:
+            parent_ids = [p.get('parentPart') for p in self.tree.findall("./Connections/Connection[@childPart='%s']" % (curid))]
+            child_ids = [c.get('childPart') for c in self.tree.findall("./Connections/Connection[@parentPart='%s']" % (curid))]
+            #print " "*depth + "Found parts connected to %s..." % (curid)
+            #print parent_ids + child_ids
+            for connected in (parent_ids + child_ids):
+                if(connected in part_pool):
+                    #print " "*depth + "Already dealt with part %s" % (connected)
+                    continue
+                elif(connected in self.detacher_list[curstage][0]):
+                    #print " "*depth + "Part %s is previous connector, ignoring" % (connected)
+                    continue
+                elif(connected in self.detacher_list[curstage][1]):
+                    #print " "*depth + "Part %s is new connector, collapsing!" % (connected)
                     return False
+                else:
+                    #print " "*depth + "Part %s looks good, adding..." % (connected)
+                    next_parts.append(connected)
 
-        return part_pool
+        return next_parts
 
 class PartInstance:
     def __init__(self, element, ship):
@@ -276,6 +284,9 @@ class ShipPart:
             'actual_size': self.get_actual_size(shape),
         })
         return data
+
+    def __getitem__(self, key):
+        return self.elem.get(key)
 
 class SpriteMap:
     def __init__(self, xmlfile):
