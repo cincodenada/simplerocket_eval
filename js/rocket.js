@@ -242,17 +242,23 @@ function Part(rocket, idx) {
     this.data = this.rocket.partslist[idx];
     this.dc = this.rocket.dc;
 
+    this.stage = this.get_stage();
+
+    //Pull in our sprite data
+    this.spritedata = this.rocket.spritemap[this.data.sprite.toLowerCase()];
+}
+
+Part.prototype.get_stage = function() {
     //Find our stage
     if(this.rocket.stagedata.detachers.length == 0) {
         //If we have no detachers, everything is stage 0
-        this.stage = 0;
+        return 0;
     } else {
         if(this.data.type == 'detacher') {
             for(s=0;s<this.rocket.stagedata.detachers.length;s++) {
-                for(p=0;p<this.rocket.stagedata.detachers[s][1].length;p++) {
-                    if(this.rocket.stagedata.detachers[s][1][p] == this.data.id) {
-                        this.stage = s;
-                        break;
+                for(p=0;p<this.rocket.stagedata.detachers[s][0].length;p++) {
+                    if(this.rocket.stagedata.detachers[s][0][p] == this.data.id) {
+                        return s;
                     }
                 }
             }
@@ -260,16 +266,12 @@ function Part(rocket, idx) {
             for(s=0;s<this.rocket.stagedata.parts.length;s++) {
                 for(p=0;p<this.rocket.stagedata.parts[s].length;p++) {
                     if(this.rocket.stagedata.parts[s][p] == this.data.id) {
-                        this.stage = s;
-                        break;
+                        return s;
                     }
                 }
             }
         }
     }
-
-    //Pull in our sprite data
-    this.spritedata = this.rocket.spritemap[this.data.sprite.toLowerCase()];
 }
 
 Part.prototype.get = function(attr) {

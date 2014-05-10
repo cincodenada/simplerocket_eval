@@ -107,7 +107,6 @@ $(document).ready(function() {
     });
 
     $('body').on('keyup', function(evt) {
-        console.log(evt.target);
         var directions = {
             37: [-1,0],
             38: [0,1],
