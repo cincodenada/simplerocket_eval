@@ -3,6 +3,7 @@ from polyfunc import SimplePoly
 import requests
 import sys
 import os
+from logging import debug, info, warning, error, critical
 
 ship_url = 'http://jundroo.com/service/SimpleRockets/DownloadRocket?id=%d'
 
@@ -48,12 +49,12 @@ class Ship:
             try:
                 shipid = int(fromwhat)
                 #Try loading from cache
-                print "Trying cache..."
+                info("Trying cache...")
                 try:
                     self.loadFile(self.get_cachepath(shipid))
-                    print "Loaded from cache."
+                    info("Loaded from cache.")
                 except (ET.ParseError, IOError):
-                    print "Cache failed, getting live..."
+                    info("Cache failed, getting live...")
                     self.loadRemoteShip(shipid)
             except ValueError:
                 self.loadFile(fromwhat)
@@ -88,7 +89,7 @@ class Ship:
                 fd.write(shipfile.content)
                 fd.close()
         except IOError:
-            print "Failed to cache ship!"
+            warning("Failed to cache ship!")
 
         self.parseFile(ET.fromstring(shipfile.text))
 
@@ -132,15 +133,15 @@ class Ship:
         stage_parts = []
         pod_parts = []
         for s in stages:
-            #print "Next stage..."
-            #print str(s)
+            debug("Next stage...")
+            debug(str(s))
             cur_parts = []
             for d in s:
                 sidebin = [[],[]]
                 findresult[0] = [self.tree.find("./Connections/Connection[@childPart='%s']" % (d)).get('parentPart')]
                 findresult[1] = [self.tree.find("./Connections/Connection[@parentPart='%s']" % (d)).get('childPart')]
-                #print str(findresult)
-                #print str(d)
+                debug(str(findresult))
+                debug(str(d))
                 cycle = 0
                 while(findresult[0] or findresult[1]):
                     if(findresult[0]):
@@ -149,7 +150,7 @@ class Ship:
                         findresult[1] = self.getMoreParts(findresult[1], sidebin[1], curstage, cycle)
                     cycle += 1
 
-                #print str(sidebin)
+                debug(str(sidebin))
 
                 if(findresult[0] != False and sidebin[1] != False):
                     if(pod_id in sidebin[0]):
@@ -168,28 +169,28 @@ class Ship:
         return stage_parts
 
     def getMoreParts(self, from_ids, part_pool, curstage, depth):
-        #print " "*depth + "Examining parts %s..." % (','.join(from_ids))
+        debug(" "*depth + "Examining parts %s..." % (','.join(from_ids)))
         part_pool.extend(from_ids)
-        #print part_pool
+        debug(part_pool)
         next_parts = []
 
         for curid in from_ids:
             parent_ids = [p.get('parentPart') for p in self.tree.findall("./Connections/Connection[@childPart='%s']" % (curid))]
             child_ids = [c.get('childPart') for c in self.tree.findall("./Connections/Connection[@parentPart='%s']" % (curid))]
-            #print " "*depth + "Found parts connected to %s..." % (curid)
-            #print parent_ids + child_ids
+            debug(" "*depth + "Found parts connected to %s..." % (curid))
+            debug(parent_ids + child_ids)
             for connected in (parent_ids + child_ids):
                 if(connected in part_pool):
-                    #print " "*depth + "Already dealt with part %s" % (connected)
+                    debug(" "*depth + "Already dealt with part %s" % (connected))
                     continue
                 elif(connected in self.detacher_list[curstage][0]):
-                    #print " "*depth + "Part %s is previous connector, ignoring" % (connected)
+                    debug(" "*depth + "Part %s is previous connector, ignoring" % (connected))
                     continue
                 elif(connected in self.detacher_list[curstage][1]):
-                    #print " "*depth + "Part %s is new connector, collapsing!" % (connected)
+                    debug(" "*depth + "Part %s is new connector, collapsing!" % (connected))
                     return False
                 else:
-                    #print " "*depth + "Part %s looks good, adding..." % (connected)
+                    debug(" "*depth + "Part %s looks good, adding..." % (connected))
                     next_parts.append(connected)
 
         return next_parts
