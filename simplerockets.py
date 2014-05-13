@@ -139,7 +139,7 @@ class Ship:
 
         curstage = 0
         try:
-            pod = self.tree.find("./Parts/Part[@partType='pod-1']").get('id')
+            pod_id = self.tree.find("./Parts/Part[@partType='pod-1']").get('id')
         except:
             raise KeyError, 'Pod not found!'
         findresult = [[],[]]
@@ -155,12 +155,11 @@ class Ship:
                 sidebin = [[],[]]
 
                 curside = self.tree.find("./Connections/Connection[@childPart='%s']" % (d))
-                findresult[0] = curside.get('parentPart') if curside else False
+                findresult[0] = [curside.get('parentPart')] if curside is not None else False
                 curside = self.tree.find("./Connections/Connection[@parentPart='%s']" % (d))
-                findresult[1] = curside.get('childPart') if curside else False
+                findresult[1] = [curside.get('childPart')] if curside is not None else False
 
                 debug(str(findresult))
-                debug(str(d))
                 cycle = 0
                 while(findresult[0] or findresult[1]):
                     if(findresult[0]):
@@ -171,7 +170,7 @@ class Ship:
 
                 debug(str(sidebin))
 
-                if(findresult[0] != False and sidebin[1] != False):
+                if(findresult[0] != False and findresult[1] != False):
                     if(pod_id in sidebin[0]):
                         pod_parts.extend(sidebin[0])
                         cur_parts.extend(sidebin[1])
