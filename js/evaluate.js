@@ -57,6 +57,7 @@ $(document).ready(function() {
         ).append(
             '<p>Error type: ' + error_info.type + '<br/>' + error_info.error + '</p>'
         ).parent().show();
+        console.log(error_info.traceback.join(''))
     }
 
     slidermax = 10000;

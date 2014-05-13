@@ -2,6 +2,7 @@ from bottle import route, run, template, view, static_file, default_app, request
 import json
 import simplerockets as sr
 import os
+import logging
 
 @route('/evaluate/<rocket_id:int>')
 @route('/evaluate/')
@@ -24,6 +25,7 @@ def evaluate(rocket_id = None):
         'error_info': {
             'error': ship.error,
             'type': ship.error_type,
+            'traceback': ship.traceback,
         },
         'rocket_id': rocket_id,
         'rocket_data': ship.partlist,
@@ -46,6 +48,10 @@ if(os.path.dirname(__file__)):
     os.chdir(os.path.dirname(__file__))
 partbin = sr.PartsBin('PartList.xml')
 shipsprites = sr.SpriteMap('img/sprites/ShipSprites.xml')
+try:
+    logging.basicConfig(filename='rocketcenter.log',level=logging.INFO)
+except Exception, e:
+    pass
 
 if __name__ == "__main__":
     run(host='localhost',port=54321,reloader=True)

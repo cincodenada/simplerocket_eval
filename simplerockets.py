@@ -1,11 +1,13 @@
 import xml.etree.ElementTree as ET
 from polyfunc import SimplePoly
 import requests
-import sys
+import sys, traceback
 import os
+import logging
 from logging import debug, info, warning, error, critical
 
 ship_url = 'http://jundroo.com/service/SimpleRockets/DownloadRocket?id=%d'
+traceback_depth = None 
 
 class PartsBin:
     def __init__(self, xmlfile):
@@ -37,6 +39,7 @@ class Ship:
         self.detacher_list = []
         self.error = None
         self.error_type = None
+        self.traceback = None
 
     def set_cachedir(self, newdir):
         self.cachedir = newdir
@@ -74,6 +77,8 @@ class Ship:
         except Exception, e:
             self.error_type = "Unknown"
             self.error = "Unknown error loading ship file.  Get me a ship ID and I can look through my error logs.  Details: " + str(e)
+            etyp, eval, etb = sys.exc_info()
+            self.traceback = traceback.format_exception(Exception,e,etb)
             return False
 
         return True
@@ -108,12 +113,16 @@ class Ship:
         steps = self.tree.findall("./Parts/Part/Pod/Staging/Step")
         stages = []
         for s in steps:
+            debug('Next stage...')
+            debug(str(s))
             cur_detachers = []
             for part in s.findall("./Activate"):
-                relpart = self.tree.find("./Parts/Part[@id='%s']" % (part.get('Id')))
+                partid = part.get('Id');
+                debug('Looking up part %s...' % (partid))
+                relpart = self.tree.find("./Parts/Part[@id='%s']" % (partid))
                 part_type = self.partsbin[relpart.get('partType')]['type']
                 if(part_type == 'detacher'):
-                    cur_detachers.append(relpart.get('id'))
+                    cur_detachers.append(partid)
             if(len(cur_detachers)):
                 stages.append(cur_detachers)
 
@@ -126,21 +135,30 @@ class Ship:
                 else:
                     bad.extend(stages[subs])
             self.detacher_list.append([good,bad])
+        debug('Stage list: ' + str(self.detacher_list))
 
         curstage = 0
-        pod_id = self.tree.find("./Parts/Part[@partType='pod-1']").get('id')
+        try:
+            pod = self.tree.find("./Parts/Part[@partType='pod-1']").get('id')
+        except:
+            raise KeyError, 'Pod not found!'
         findresult = [[],[]]
 
         stage_parts = []
         pod_parts = []
         for s in stages:
-            debug("Next stage...")
+            debug("Finding parts for stage...")
             debug(str(s))
             cur_parts = []
             for d in s:
+                debug("Scanning part %s..." % (d))
                 sidebin = [[],[]]
-                findresult[0] = [self.tree.find("./Connections/Connection[@childPart='%s']" % (d)).get('parentPart')]
-                findresult[1] = [self.tree.find("./Connections/Connection[@parentPart='%s']" % (d)).get('childPart')]
+
+                curside = self.tree.find("./Connections/Connection[@childPart='%s']" % (d))
+                findresult[0] = curside.get('parentPart') if curside else False
+                curside = self.tree.find("./Connections/Connection[@parentPart='%s']" % (d))
+                findresult[1] = curside.get('childPart') if curside else False
+
                 debug(str(findresult))
                 debug(str(d))
                 cycle = 0
