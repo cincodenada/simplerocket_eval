@@ -237,8 +237,9 @@ $(document).ready(function() {
     }
 
     function getCanvasPoint(mouseevt) {
-        var x = mouseevt.pageX - ctx.canvas.offsetLeft;
-        var y = mouseevt.pageY - ctx.canvas.offsetTop;
+        var canvaspos = $(ctx.canvas).offset();
+        var x = mouseevt.pageX - canvaspos.left;
+        var y = mouseevt.pageY - canvaspos.top;
 
         return ctx.gt().detransformPoint(x, y);
     }
