@@ -322,17 +322,20 @@ Part.prototype.draw = function(with_centroid) {
 
     this.dc.gt().save();
     this.dc.gt().translate(this.get('x'),this.get('y'));
-    this.dc.gt().scale(this.data.flippedX*2-1,1-this.data.flippedY*2);
     this.dc.gt().rotate(this.get('editorAngle')*Math.PI/2);
+    this.dc.gt().scale(this.data.flippedX*2-1,1-this.data.flippedY*2);
 
     switch(this.rocket.drawmode) {
     case 'sprites':
+        //Scale image down
+        aspect = Math.max(this.spritedata.w/this.data.actual_size[0], this.spritedata.h/this.data.actual_size[1])
+        spritesize = [this.spritedata.w/aspect,this.spritedata.h/aspect];
         //Draw sprite
         this.dc.gt().save()
         this.dc.gt().rotate(Math.PI);
         this.dc.drawImage(this.rocket.sprite, 
             this.spritedata.x, this.spritedata.y, this.spritedata.w, this.spritedata.h,
-            -this.data.actual_size[0]/2, -this.data.actual_size[1]/2, this.data.actual_size[0], this.data.actual_size[1]
+            -spritesize[0]/2, -spritesize[1]/2, spritesize[0], spritesize[1]
         );
         this.dc.gt().restore()
         break;
