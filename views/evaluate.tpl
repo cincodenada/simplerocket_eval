@@ -30,7 +30,7 @@ var error_info = {{!json.dumps(error_info)}};
     <span style="float: right">
         Showing
     %if rocket_id:
-        rocket {{rocket_id}}
+        {{rocket_name}}
         | <a href="http://jundroo.com/ViewShip.html?id={{rocket_id}}" target="_blank">Download</a>
     %else:
         demo rocket

@@ -28,6 +28,7 @@ def evaluate(rocket_id = None):
             'traceback': ship.traceback,
         },
         'rocket_id': rocket_id,
+        'rocket_name': ship.name if ship.name else ('rocket %d' % (rocket_id)),
         'rocket_data': ship.partlist,
         'stage_data': {
             'parts': ship.stage_parts,

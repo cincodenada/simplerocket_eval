@@ -40,6 +40,7 @@ class Ship:
         self.error = None
         self.error_type = None
         self.traceback = None
+        self.name = ''
 
     def set_cachedir(self, newdir):
         self.cachedir = newdir
@@ -139,7 +140,9 @@ class Ship:
 
         curstage = 0
         try:
-            pod_id = self.tree.find("./Parts/Part[@partType='pod-1']").get('id')
+            pod = self.tree.find("./Parts/Part[@partType='pod-1']")
+            pod_id = pod.get('id')
+            self.name = pod.find("./Pod").get('name')
         except:
             raise KeyError, 'Pod not found!'
         findresult = [[],[]]
