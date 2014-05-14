@@ -4,6 +4,8 @@ import simplerockets as sr
 import os
 import logging
 
+demo_id = 119304
+
 @route('/evaluate/<rocket_id:int>')
 @route('/evaluate/')
 @route('/evaluate')
@@ -16,10 +18,19 @@ def evaluate(rocket_id = None):
     ship = partbin.getShip()
     ship.set_cachedir(os.path.join(os.getcwd(),'cache'))
     
-    if(rocket_id):
-        ship.load(rocket_id)
+    if(not rocket_id):
+        rocket_id = demo_id
+
+    ship.load(rocket_id)
+
+    if ship.name:
+        rocket_name = ship.name
+    elif rocket_id == demo_id:
+        rocket_name = 'Demo rocket'
+    elif rocket_id:
+        rocket_name = 'rocket %d' % (rocket_id)
     else:
-        ship.load('OrbiterFull.xml')
+        rocket_name = 'Unknown rocket'
 
     return {
         'error_info': {
@@ -28,7 +39,7 @@ def evaluate(rocket_id = None):
             'traceback': ship.traceback,
         },
         'rocket_id': rocket_id,
-        'rocket_name': ship.name if ship.name else ('rocket %d' % (rocket_id)),
+        'rocket_name': rocket_name,
         'rocket_data': ship.partlist,
         'stage_data': {
             'parts': ship.stage_parts,

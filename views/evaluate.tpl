@@ -29,13 +29,8 @@ var error_info = {{!json.dumps(error_info)}};
     </label>
     <span style="float: right">
         Showing
-    %if rocket_id:
         {{rocket_name}}
         | <a href="http://jundroo.com/ViewShip.html?id={{rocket_id}}" target="_blank">Download</a>
-    %else:
-        demo rocket
-        | <a href="http://jundroo.com/ViewShip.html?id=119304" target="_blank">Download</a>
-    %end
     </span>
     <br/>
     Fuel level:

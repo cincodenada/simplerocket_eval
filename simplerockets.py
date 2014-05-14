@@ -240,7 +240,7 @@ class PartInstance:
 
     def adjust(self):
         #Flip lander struts for display
-        if(self.part['type'] == 'lander'):
+        if(self.part['type'] in ('lander')):
             if((self.parent is not None) and int(self.parent.get('childAttachPoint')) == 1):
                 self.elem.set('flippedX',1-int(self['flippedX']))
 
