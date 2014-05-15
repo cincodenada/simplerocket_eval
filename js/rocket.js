@@ -34,6 +34,8 @@ function Rocket(data, dc) {
     this.stagedata.deltaV = false;
     this.centroid = false;
 
+    this.bb = false;
+
     //Build parts list
     this.parts = [];
     for(var i=0;i<this.partslist.length;i++) {
@@ -43,11 +45,9 @@ function Rocket(data, dc) {
 
 //Draw rocket
 Rocket.prototype.draw = function() {
-    var me = this;
-
-    me.dc.strokeStyle = "black";
-    me.dc.lineWidth = 0.1;
-    me.dc.fillStyle = "silver";
+    this.dc.strokeStyle = "black";
+    this.dc.lineWidth = 0.1;
+    this.dc.fillStyle = "silver";
     $.each(this.parts, function(idx, part) {
         //Draw non-selected parts
         if(!part.selected()) {
@@ -86,9 +86,8 @@ Rocket.prototype.set_fuel = function(value) {
     this.clear_calculated();
 }
 
-Rocket.prototype.draw_centroid = function() {
-    var me = this;
-    if(!me.centroid) {
+Rocket.prototype.get_centroid = function() {
+    if(!this.centroid) {
         avgcentroid = [0,0];
         total_mass = 0;
         $.each(this.parts, function(idx, part) {
@@ -104,16 +103,97 @@ Rocket.prototype.draw_centroid = function() {
         avgcentroid[0] = avgcentroid[0]/total_mass;
         avgcentroid[1] = avgcentroid[1]/total_mass;
 
-        me.centroid = avgcentroid;
+        this.centroid = avgcentroid;
     }
 
+    return this.centroid
+}
+
+Rocket.prototype.draw_centroid = function() {
     //Draw part centroid
-    me.dc.strokeStyle = "black";
-    me.dc.lineWidth = 0.4;
-    me.dc.drawX(me.centroid[0],me.centroid[1],0.6);
-    me.dc.strokeStyle = "yellow";
-    me.dc.lineWidth = 0.2;
-    me.dc.drawX(me.centroid[0],me.centroid[1],0.5);
+    this.get_centroid();
+
+    this.dc.strokeStyle = "black";
+    this.dc.lineWidth = 0.4;
+    this.dc.drawX(this.centroid[0],this.centroid[1],0.6);
+    this.dc.strokeStyle = "yellow";
+    this.dc.lineWidth = 0.2;
+    this.dc.drawX(this.centroid[0],this.centroid[1],0.5);
+
+    this.draw_balance();
+}
+
+Rocket.prototype.draw_balance = function() {
+    rcs = [];
+    for(idx in this.parts) {
+        if(this.parts[idx].get('type') == 'rcs') {
+            rcs.push(this.parts[idx]);
+        }
+    }
+
+    center = this.get_centroid();
+    torque = [];
+    total_torque = [0,0];
+    for(var i=0; i<rcs.length; i++) {
+        relpos = [
+            rcs[i].get('x') - center[0],
+            rcs[i].get('y') - center[1]
+        ];
+        dist = Math.sqrt(Math.pow(relpos[0],2) + Math.pow(relpos[1],2));
+        //I did my math assuming a positive angle
+        //this lost sign is probably put back in down there somewhere
+        //But this works too, which is all I care about.
+        θ = Math.abs(Math.atan(relpos[1]/relpos[0]));
+        f = [
+            rcs[i].get('flippedX') ? 1 : -1,
+            1
+        ];
+
+        //Get the torque direction
+        torque_dir = $.map(relpos, function(val, i) {
+            return val == 0 ? 0 : (val > 0 ? 1 : -1);
+        });
+            
+
+        //f' = f sin θ, use 1 for f since it's as good as any
+        torque[i] = [
+            -f[0]*Math.sin(θ)*dist*torque_dir[1],
+            f[1]*Math.cos(θ)*dist*torque_dir[0]
+        ];
+
+        scale = 0.1;
+        this.dc.strokeStyle = "red";
+        this.dc.lineWidth = 0.1;
+        this.dc.beginPath();
+        this.dc.moveTo(rcs[i].get('x'), rcs[i].get('y'));
+        this.dc.lineTo(rcs[i].get('x') + torque[i][0]*scale,rcs[i].get('y'));
+        this.dc.moveTo(rcs[i].get('x'), rcs[i].get('y'));
+        this.dc.lineTo(rcs[i].get('x'), rcs[i].get('y') + torque[i][1]*scale);
+        this.dc.stroke()
+
+        total_torque[0] += torque[i][0];
+        total_torque[1] += torque[i][1];
+    }
+
+    margin = 0.25;
+    bb = this.get_bb();
+    this.dc.beginPath();
+    this.dc.moveTo(center[0],                   bb[0][1] - margin);
+    this.dc.lineTo(center[0] + total_torque[0], bb[0][1] - margin);
+    this.dc.moveTo(center[0],                   bb[1][1] + margin);
+    this.dc.lineTo(center[0] - total_torque[0], bb[1][1] + margin);
+
+    this.dc.moveTo(bb[0][0] - margin,center[1]);
+    this.dc.lineTo(bb[0][0] - margin,center[1] - total_torque[0]);
+    this.dc.moveTo(bb[1][0] + margin,center[1]);
+    this.dc.lineTo(bb[1][0] + margin,center[1] + total_torque[0]);
+
+    this.dc.strokeStyle = "black";
+    this.dc.lineWidth = 0.3;
+    this.dc.stroke();
+    this.dc.strokeStyle = "yellow";
+    this.dc.lineWidth = 0.2;
+    this.dc.stroke();
 }
 
 Rocket.prototype.getClosestPart = function(clicked, maxdist) {
@@ -223,9 +303,40 @@ Rocket.prototype.deltaV = function(stage) {
     }
 }
 
+//min, max/x, y
+Rocket.prototype.get_bb = function() {
+    var me = this;
+    if(!this.bb) {
+        this.bb = [
+            [null,null],
+            [null,null],
+        ];
+        $.each(this.parts, function(idx, part) {
+            if(part.is_active()) {
+                pos = part.get('position');
+                halfsize = $.map(part.get('size'), function(x) { return x/2; });
+
+                //Extend bounding box for our rocket
+                for(var minmax = 0; minmax < 2; minmax++) {
+                    posneg = minmax*2-1;
+                    for(var xy = 0; xy < 2; xy++) {
+                        compval = pos[xy] + (halfsize[xy] * posneg);
+                        if(me.bb[minmax][xy] == null ||
+                            posneg*compval > posneg*me.bb[minmax][xy]) {
+                            me.bb[minmax][xy] = compval;
+                        }
+                    }
+                }
+            }
+        });
+    }
+    return this.bb;
+}
+
 Rocket.prototype.clear_calculated = function(stagedata) {
     if(typeof stagedata == 'undefined') { stagedata = true; }
     this.centroid = false;
+    this.bb = false;
     if(stagedata) {
         this.stagedata.deltaV = false;
     }
@@ -279,6 +390,8 @@ Part.prototype.get = function(attr) {
     case "x":
     case "y":
         return this.data[attr]*2;
+    case "position":
+        return [this.data.x*2,this.data.y*2];
     default:
         return this.data[attr];
     }
