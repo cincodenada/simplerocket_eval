@@ -56,7 +56,7 @@ var error_info = {{!json.dumps(error_info)}};
         <h2>Tips:</h2>
         <ul>
             <li>Paste a ship URL in the "Load Rocket" box (or play around with the demo ship)</li>
-            <li>Red dots are centers of mass of individual parts, yellow X is center of mass of the whole ship</li>
+            <li>Green dots are centers of mass of individual parts, yellow X is center of mass of the whole ship</li>
             <li>Click on a part to select it.  You can then use the fuel level slider to adjust that tank's fuel.</li>
             <li>To adjust all fuel tanks at once, click on the command pod.  The slider will then adjust all tanks.</li>
         </ul>

@@ -133,7 +133,7 @@ Rocket.prototype.draw_balance = function() {
 
     center = this.get_centroid();
     torque = [];
-    total_torque = [0,0];
+    total_torque = [0,0,0,0];
     for(var i=0; i<rcs.length; i++) {
         relpos = [
             rcs[i].get('x') - center[0],
@@ -144,9 +144,12 @@ Rocket.prototype.draw_balance = function() {
         //this lost sign is probably put back in down there somewhere
         //But this works too, which is all I care about.
         θ = Math.abs(Math.atan(relpos[1]/relpos[0]));
+        //Force this engine contributes for each direction (up, right, down, left)
         f = [
-            rcs[i].get('flippedX') ? 1 : -1,
-            1
+            1,
+            rcs[i].get('flippedX') ? 1 : 0,
+            -1,
+            rcs[i].get('flippedX') ? 0 : -1,
         ];
 
         //Get the torque direction
@@ -157,42 +160,39 @@ Rocket.prototype.draw_balance = function() {
 
         //f' = f sin θ, use 1 for f since it's as good as any
         torque[i] = [
-            -f[0]*Math.sin(θ)*dist*torque_dir[1],
-            f[1]*Math.cos(θ)*dist*torque_dir[0]
+            f[0]*Math.cos(θ)*dist*torque_dir[0],
+            -f[1]*Math.sin(θ)*dist*torque_dir[1],
+            f[2]*Math.cos(θ)*dist*torque_dir[0],
+            -f[3]*Math.sin(θ)*dist*torque_dir[1],
         ];
 
-        scale = 0.1;
-        this.dc.strokeStyle = "red";
-        this.dc.lineWidth = 0.1;
-        this.dc.beginPath();
-        this.dc.moveTo(rcs[i].get('x'), rcs[i].get('y'));
-        this.dc.lineTo(rcs[i].get('x') + torque[i][0]*scale,rcs[i].get('y'));
-        this.dc.moveTo(rcs[i].get('x'), rcs[i].get('y'));
-        this.dc.lineTo(rcs[i].get('x'), rcs[i].get('y') + torque[i][1]*scale);
-        this.dc.stroke()
-
-        total_torque[0] += torque[i][0];
-        total_torque[1] += torque[i][1];
+        for(var j=0; j<4;j++) {
+            total_torque[j] += torque[i][j];
+        }
     }
 
-    margin = 0.25;
+    margin = 0.5;
     bb = this.get_bb();
     this.dc.beginPath();
+
     this.dc.moveTo(center[0],                   bb[0][1] - margin);
     this.dc.lineTo(center[0] + total_torque[0], bb[0][1] - margin);
+
     this.dc.moveTo(center[0],                   bb[1][1] + margin);
-    this.dc.lineTo(center[0] - total_torque[0], bb[1][1] + margin);
+    this.dc.lineTo(center[0] - total_torque[2], bb[1][1] + margin);
+
+    this.dc.moveTo(bb[1][0] + margin,center[1]);
+    this.dc.lineTo(bb[1][0] + margin,center[1] + total_torque[1]);
 
     this.dc.moveTo(bb[0][0] - margin,center[1]);
-    this.dc.lineTo(bb[0][0] - margin,center[1] - total_torque[0]);
-    this.dc.moveTo(bb[1][0] + margin,center[1]);
-    this.dc.lineTo(bb[1][0] + margin,center[1] + total_torque[0]);
+    this.dc.lineTo(bb[0][0] - margin,center[1] - total_torque[3]);
+
 
     this.dc.strokeStyle = "black";
-    this.dc.lineWidth = 0.3;
+    this.dc.lineWidth = 0.5;
     this.dc.stroke();
-    this.dc.strokeStyle = "yellow";
-    this.dc.lineWidth = 0.2;
+    this.dc.strokeStyle = "red";
+    this.dc.lineWidth = 0.3;
     this.dc.stroke();
 }
 
@@ -519,7 +519,7 @@ Part.prototype.draw_path = function() {
 }
 
 Part.prototype.draw_centroid = function() {
-    this.dc.fillStyle = "red";
+    this.dc.fillStyle = "green";
     this.dc.beginPath()
 
     //Draw part centroid
