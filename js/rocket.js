@@ -18,6 +18,8 @@ function Rocket(data, dc) {
     this.sprite = new Image();
     this.sprite.src = data.spriteurl;
 
+    this.deleted_parts = [];
+
     //After some empirical calculations, I am assuming that the 
     //numbers in the engines (425, 170, 85) are the thrust
     //force in kilonewtons.  Using F = Ve*m, I calculated
@@ -342,6 +344,20 @@ Rocket.prototype.clear_calculated = function(stagedata) {
     }
 }
 
+Rocket.prototype.delete_parts = function() {
+    del_list = [];
+    for(var s in this.selpart) {
+        if(this.selpart[s]) { del_list.push(s); }
+    }
+    this.selpart = [];
+    this.deleted_parts.push(del_list);
+    this.clear_calculated();
+}
+
+Rocket.prototype.undelete_parts = function() {
+    this.deleted_parts.pop();
+    this.clear_calculated();
+}
 
 /*
  * Rocket Part
@@ -412,6 +428,15 @@ Part.prototype.selected = function() {
 }
 
 Part.prototype.is_active = function() {
+    //Check for deleted parts
+    for(var set in this.rocket.deleted_parts) {
+        for(var p in this.rocket.deleted_parts[set]) {
+            if(this.rocket.deleted_parts[set][p] == this.idx) {
+                return false;
+            }
+        }
+    }
+
     if(!this.rocket.curstage) {
         return true;
     } else {

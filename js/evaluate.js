@@ -72,6 +72,9 @@ $(document).ready(function() {
     });
 
     $(canvelm).on('click',function(evt) {
+        //De-focus the inputs
+        $('input, select, .ui-slider-handle').blur();
+
         relpoint = getCanvasPoint(evt);
         idx = rocket.getClosestPart(relpoint, 10);
         if(evt.shiftKey) {
@@ -109,21 +112,37 @@ $(document).ready(function() {
 
     $('body').on('keyup', function(evt) {
         var directions = {
-            37: [-1,0],
-            38: [0,1],
-            39: [1,0],
-            40: [0,-1],
+            37: {'move': [-1,0]},
+            38: {'move': [0,1]},
+            39: {'move': [1,0]},
+            40: {'move': [0,-1]},
+            46: {'delete': true},
         }
         var moveamt = 0.25;
         for(keycode in directions) {
             if(evt.which == keycode) {
-                rocket.move_parts(
-                    directions[keycode][0]*moveamt,
-                    directions[keycode][1]*moveamt
-                );
-                render();
                 evt.preventDefault();
                 evt.stopPropagation();
+
+                for(action in directions[keycode]) {
+                    val = directions[keycode][action];
+                    switch(action) {
+                    case 'move':
+                        rocket.move_parts(
+                            val[0]*moveamt,
+                            val[1]*moveamt
+                        );
+                        break;
+                    case 'delete':
+                        if(evt.shiftKey) {
+                            rocket.undelete_parts();
+                        } else {
+                            rocket.delete_parts();
+                        }
+                        break;
+                    }
+                }
+                render();
                 break;
             }
         }
