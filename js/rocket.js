@@ -88,10 +88,23 @@ Rocket.prototype.set_fuel = function(value) {
     this.clear_calculated();
 }
 
+Rocket.prototype.get_mass = function() {
+    if(!this.mass) {
+        this.mass = 0;
+        $.each(this.parts, function(idx, part) {
+            if(part.is_active()) {
+                this.mass += part.get_mass();
+            }
+        });
+    }
+    return this.mass;
+}
+
 Rocket.prototype.get_centroid = function() {
+    var me = this;
     if(!this.centroid) {
         avgcentroid = [0,0];
-        total_mass = 0;
+        me.mass = 0;
         $.each(this.parts, function(idx, part) {
             if(part.is_active()) {
                 centroid = part.get_abs('centroid');
@@ -99,11 +112,11 @@ Rocket.prototype.get_centroid = function() {
 
                 avgcentroid[0] += centroid[0]*adj_mass;
                 avgcentroid[1] += centroid[1]*adj_mass;
-                total_mass += adj_mass;
+                me.mass += adj_mass;
             }
         });
-        avgcentroid[0] = avgcentroid[0]/total_mass;
-        avgcentroid[1] = avgcentroid[1]/total_mass;
+        avgcentroid[0] = avgcentroid[0]/me.mass;
+        avgcentroid[1] = avgcentroid[1]/me.mass;
 
         this.centroid = avgcentroid;
     }
@@ -171,6 +184,10 @@ Rocket.prototype.draw_balance = function() {
         for(var j=0; j<4;j++) {
             total_torque[j] += torque[i][j];
         }
+    }
+
+    for(var i=0; i<4; i++) {
+        total_torque[i] = total_torque[i]/this.get_mass()*10;
     }
 
     margin = 0.5;
@@ -339,6 +356,7 @@ Rocket.prototype.clear_calculated = function(stagedata) {
     if(typeof stagedata == 'undefined') { stagedata = true; }
     this.centroid = false;
     this.bb = false;
+    this.mass = false;
     if(stagedata) {
         this.stagedata.deltaV = false;
     }
