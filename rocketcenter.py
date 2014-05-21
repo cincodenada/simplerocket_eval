@@ -9,11 +9,12 @@ demo_id = 119304
 @route('/evaluate/<rocket_id:int>')
 @route('/evaluate/')
 @route('/evaluate')
+@route('/ViewShip.html')
 @route('/')
 @view('evaluate')
 def evaluate(rocket_id = None):
     if(request.query.get('id')):
-        rocket_id = request.query.get('id')
+        rocket_id = int(request.query.get('id'))
 
     ship = partbin.getShip()
     ship.set_cachedir(os.path.join(os.getcwd(),'cache'))
