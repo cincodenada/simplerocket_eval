@@ -25,7 +25,7 @@ var error_info = {{!json.dumps(error_info)}};
     </select>
     <label>
         <input type="checkbox" id="evaluate" checked="checked"/>
-        Show detailed analysis
+        Show analysis
     </label>
     <span style="float: right">
         Showing

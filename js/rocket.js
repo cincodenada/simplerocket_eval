@@ -124,6 +124,11 @@ Rocket.prototype.get_centroid = function() {
     return this.centroid
 }
 
+Rocket.prototype.draw_annotations = function() {
+    this.draw_centroid();
+    this.draw_balance();
+}
+
 Rocket.prototype.draw_centroid = function() {
     //Draw part centroid
     this.get_centroid();
@@ -134,8 +139,6 @@ Rocket.prototype.draw_centroid = function() {
     this.dc.strokeStyle = "yellow";
     this.dc.lineWidth = 0.2;
     this.dc.drawX(this.centroid[0],this.centroid[1],0.5);
-
-    this.draw_balance();
 }
 
 Rocket.prototype.draw_balance = function() {
@@ -269,7 +272,9 @@ Rocket.prototype.set_selected = function(idx) {
 
 Rocket.prototype.render = function() {
     this.draw();
-    this.draw_centroid();
+    if(this.show_annotations) {
+        this.draw_annotations();
+    }
 }
 
 Rocket.prototype.set_stage = function(stage) {
