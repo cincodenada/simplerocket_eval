@@ -29,11 +29,6 @@ $(document).ready(function() {
     ctx.canvas.style.width = ctx.canvas.width;
     ctx.canvas.style.height = ctx.canvas.height;
 
-    ctx.gt().translate(ctx.canvas.width/2,ctx.canvas.height/2);
-    ctx.gt().scale(scale,-scale);
-    ctx.lineWidth = 0.1;
-
-
     rocket = new Rocket({
         'parts':rocketdata,
         'stages':stagedata,
@@ -41,6 +36,7 @@ $(document).ready(function() {
         'spriteurl': '/img/sprites/ShipSprites.png'
     }, ctx);
     rocket.sprite.onload = function() {
+        resetview();
         render();
     };
 
@@ -213,6 +209,23 @@ $(document).ready(function() {
         ctx.gt().setTransform(1,0,0,1,0,0);
         ctx.gt().translate(ctx.canvas.width/2,ctx.canvas.height/2);
         ctx.gt().scale(scale,-scale);
+
+        var bb = rocket.get_bb();
+
+        //Zoom to rocket
+        var viewsize = ctx.gt().detransformPoint(ctx.canvas.width,ctx.canvas.height);
+        var zoomx = Math.abs(viewsize.x/(bb[1][0]-bb[0][0]));
+        var zoomy = Math.abs(viewsize.y/(bb[1][1]-bb[0][1]));
+        //Not sure why I'm off by a factor of two, but eh
+        var zoom = (Math.min(zoomx, zoomy)*2)/1.2;
+        ctx.gt().scale(zoom, zoom);
+        scale *= zoom;
+
+        //Center rocket
+        offsetx = ((bb[1][0]+bb[0][0])/2);
+        offsety = ((bb[1][1]+bb[0][1])/2);
+        ctx.gt().translate(-offsetx, -offsety);
+
         render();
     }
 
