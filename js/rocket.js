@@ -164,9 +164,9 @@ Rocket.prototype.draw_balance = function() {
         θ = Math.abs(Math.atan(relpos[1]/relpos[0]));
         //Force this engine contributes for each direction (up, right, down, left)
         f = [
-            1,
-            rcs[i].get('flippedX') ? 1 : 0,
             -1,
+            rcs[i].get('flippedX') ? 1 : 0,
+            1,
             rcs[i].get('flippedX') ? 0 : -1,
         ];
 
@@ -197,24 +197,40 @@ Rocket.prototype.draw_balance = function() {
     bb = this.get_bb();
     this.dc.beginPath();
 
-    this.dc.moveTo(center[0],                   bb[0][1] - margin);
-    this.dc.lineTo(center[0] + total_torque[0], bb[0][1] - margin);
-
-    this.dc.moveTo(center[0],                   bb[1][1] + margin);
-    this.dc.lineTo(center[0] - total_torque[2], bb[1][1] + margin);
-
-    this.dc.moveTo(bb[1][0] + margin,center[1]);
-    this.dc.lineTo(bb[1][0] + margin,center[1] + total_torque[1]);
-
-    this.dc.moveTo(bb[0][0] - margin,center[1]);
-    this.dc.lineTo(bb[0][0] - margin,center[1] - total_torque[3]);
-
+    for(var i=0; i<4; i++) {
+        var minmax = 1-Math.floor(i/2);
+        var neg = minmax*2-1;
+        if(i % 2) {
+            this.dc.moveTo(bb[minmax][0] + margin*neg,center[1]);
+            this.dc.lineTo(bb[minmax][0] + margin*neg,center[1] + total_torque[i]*neg);
+        } else {
+            this.dc.moveTo(center[0],                   bb[minmax][1] + margin*neg);
+            this.dc.lineTo(center[0] + total_torque[i]*neg, bb[minmax][1] + margin*neg);
+        }
+    }
 
     this.dc.strokeStyle = "black";
     this.dc.lineWidth = 0.5;
     this.dc.stroke();
     this.dc.strokeStyle = "red";
     this.dc.lineWidth = 0.3;
+    this.dc.stroke();
+
+    var hashw = 0.3;
+    this.dc.beginPath();
+    for(var i=0; i<4; i++) {
+        var minmax = 1-Math.floor(i/2);
+        var neg = minmax*2-1;
+        if(i % 2) {
+            this.dc.moveTo(bb[minmax][0] + (margin+hashw)*neg,center[1]);
+            this.dc.lineTo(bb[minmax][0] + (margin-hashw)*neg,center[1]);
+        } else {
+            this.dc.moveTo(center[0], bb[minmax][1] + (margin+hashw)*neg);
+            this.dc.lineTo(center[0], bb[minmax][1] + (margin-hashw)*neg);
+        }
+    }
+    this.dc.strokeStyle = "white";
+    this.dc.lineWidth = 0.05;
     this.dc.stroke();
 }
 
