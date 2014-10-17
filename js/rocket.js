@@ -588,7 +588,7 @@ Part.prototype.draw_centroid = function() {
     this.dc.beginPath()
 
     //Draw part centroid
-    adj_mass = this.data.mass - this.data.fuel_mass*(1-this.get_fuel());
+    adj_mass = this.get_mass();
     this.dc.arc(
         this.data.centroid[0],this.data.centroid[1],
         Math.sqrt(0.25*adj_mass/Math.PI),0,Math.PI*2,false
@@ -608,11 +608,19 @@ Part.prototype.get_abs = function(attr, index) {
 }
 
 Part.prototype.get_mass = function() {
-    return this.data.mass - this.data.fuel_mass*(1-this.get_fuel());
+    return this.data.mass - this.get_missing_fuel_mass();
 }
 
 Part.prototype.get_fuel = function() {
     return this.rocket.get_fuel(this.idx);
+}
+
+Part.prototype.get_missing_fuel_mass = function() {
+    if(this.data.fuel_mass) {
+        return this.data.fuel_mass*(1-this.get_fuel())
+    } else {
+        return 0;
+    }
 }
 
 Part.prototype.get_fuel_mass = function() {
