@@ -12,7 +12,7 @@ function Rocket(data, dc) {
 
     this.fuel_style = 'overlay';
     this.drawmode = 'sprites';
-    this.show_annotations = true;
+    this.show_annotations = false;
 
     this.spritemap = data.sprites;
     this.sprite = new Image();
@@ -89,15 +89,16 @@ Rocket.prototype.set_fuel = function(value) {
 }
 
 Rocket.prototype.get_mass = function() {
-    if(!this.mass) {
-        this.mass = 0;
-        $.each(this.parts, function(idx, part) {
+    var me = this;
+    if(!me.mass) {
+        me.mass = 0;
+        $.each(me.parts, function(idx, part) {
             if(part.is_active()) {
-                this.mass += part.get_mass();
+                me.mass += part.get_mass();
             }
         });
     }
-    return this.mass;
+    return me.mass;
 }
 
 Rocket.prototype.get_centroid = function() {

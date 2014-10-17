@@ -62,6 +62,7 @@ $(document).ready(function() {
         max: slidermax,
         value: slidermax,
         slide: function(evt, ui) {
+            $('#evaluate').prop('checked',true);
             rocket.set_fuel(ui.value/slidermax);
             render();
         }
@@ -260,11 +261,12 @@ $(document).ready(function() {
                 $stats.append('Stage ' + (s+1) + ': ' + dv_text(deltasV[s]) + '<br/>');
                 totalDv += deltasV[s];
             }
-            $stats.append('Total: ' + dv_text(totalDv));
+            $stats.append('Total: ' + dv_text(totalDv) + '<br/>');
+            $stats.append('<br/>Ship mass: ' + Math.round(rocket.get_mass()*500) + ' kg');
         }
     }
 
-    function dv_text(val) {
+    function dv_text(val, suffix) {
         return Math.round(val*100)/100 + ' m/s'
     }
 

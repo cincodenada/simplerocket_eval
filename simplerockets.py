@@ -102,11 +102,13 @@ class Ship:
     def parseFile(self, tree):
         self.detacher_list = []
         self.partlist = []
+        self.parts = []
         self.tree = tree
         parts = tree.findall('./Parts/Part')
         for p in parts:
             newpart = PartInstance(p, self)
             newpart.adjust()
+            self.parts.append(newpart)
             self.partlist.append(newpart.get_dict())
         self.stage_parts = self.findStages()
 

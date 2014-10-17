@@ -24,7 +24,7 @@ var error_info = {{!json.dumps(error_info)}};
         <option value="1">Stage 1</option>
     </select>
     <label>
-        <input type="checkbox" id="evaluate" checked="checked"/>
+        <input type="checkbox" id="evaluate"/>
         Show analysis
     </label>
     <span style="float: right">
@@ -56,13 +56,19 @@ var error_info = {{!json.dumps(error_info)}};
         <h2>Tips:</h2>
         <ul>
             <li>Paste a ship URL in the "Load Rocket" box (or play around with the demo ship)</li>
+            <li><b>Analysis overlays are now off by default</b> - just check the "Show analysis" box at the top to see them.</li>
             <li>Green dots are centers of mass of individual parts, yellow X is center of mass of the whole ship</li>
             <li>Click on a part to select it.  You can then use the fuel level slider to adjust that tank's fuel.</li>
             <li>To adjust all fuel tanks at once, click on the command pod.  The slider will then adjust all tanks.</li>
+            <li>
+                Red bars around the ship indicate how much it will rotate if you use RCS thrusters to move it in each
+                direction.  Adjust RCS placement to keep these as small as possible for any stage you're moving with RCS.
+            </li>
         </ul>
         <ul id="moretips">
             <li>Hold the <b>shift</b> key to select multiple parts</li>
             <li>For minor adjustments, use the arrow keys to move selected parts around one editor grid unit at a time</li>
+            <li>Use the delete key to remove parts.  Shift-delete will bring them back.</li>
             <li>You can zoom with the buttons, scroll wheel, or double-clicking</li>
             <li>Use the dropdown menu on the upper left to select just a specific stage for evaluation</li>
         </ul>
