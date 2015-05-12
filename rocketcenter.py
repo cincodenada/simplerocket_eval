@@ -16,7 +16,7 @@ def evaluate(rocket_id = None):
     if(request.query.get('id')):
         rocket_id = int(request.query.get('id'))
 
-    ship = partbin.getShip()
+    ship = sr.Ship(ship_assets)
     ship.set_cachedir(os.path.join(os.getcwd(),'cache'))
     
     if(not rocket_id):
@@ -46,7 +46,7 @@ def evaluate(rocket_id = None):
             'parts': ship.stage_parts,
             'detachers': ship.detacher_list,
         },
-        'sprite_data': shipsprites.get_dict(),
+        'sprite_data': ship_assets.getSprites(),
     }
 
 @route('/<type:re:(js|css|img|cache)>/<filename>')
@@ -59,8 +59,12 @@ def get_app():
 
 if(os.path.dirname(__file__)):
     os.chdir(os.path.dirname(__file__))
-partbin = sr.PartsBin('PartList.xml')
-shipsprites = sr.SpriteMap('img/sprites/ShipSprites.xml')
+
+ship_assets = sr.AssetBin(
+    'PartList.xml',
+    'img/sprites/ShipSprites.xml'
+)
+
 try:
     logging.basicConfig(filename='rocketcenter.log',level=logging.INFO)
 except Exception, e:

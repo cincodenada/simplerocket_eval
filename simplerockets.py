@@ -5,6 +5,7 @@ import sys, traceback
 import os
 import logging
 from logging import debug, info, warning, error, critical
+from collections import OrderedDict
 
 ship_url = 'http://jundroo.com/service/SimpleRockets/DownloadRocket?id=%d'
 traceback_depth = None 
@@ -24,8 +25,97 @@ class PartsBin:
     def getShip(self):
         return Ship(self)
 
-    def __getitem__(self, idx):
-        return self.part_dict[idx]
+    def getPart(self, key):
+        if key in self.part_dict:
+            return self.part_dict[key]
+        else:
+            return None
+
+    def __getitem__(self, key):
+        return self.part_dict[key]
+
+class SpriteMap:
+    def __init__(self, xmlfile):
+        sprite_xml = ET.ElementTree()
+        sprite_xml.parse(xmlfile)
+        self.sprite_list = {}
+
+        for sprite in sprite_xml.findall('./sprite'):
+            self.sprite_list[sprite.get('n').lower()] = sprite.attrib
+
+    def get_dict(self):
+        return self.sprite_list
+
+class AssetBin:
+    def __init__(self, partsfile, spritemap):
+        self.base_key = 'base'
+        self.mods = OrderedDict()
+
+        base_mod = Mod()
+        base_mod.loadPartsFile(partsfile)
+        base_mod.loadSpriteMap(spritemap)
+
+        self.mods[self.base_key] = base_mod
+
+    def addModfile(self, modfile, title = None):
+        if title is None:
+            titlebits = modfile.split('.')
+            title = titlebits[0]
+
+        self.mods[title] = Mod(modfile)
+
+    def getMods(self):
+        return self.mods.keys()[1:]
+
+    def getPart(self, part_key, mod_list = None):
+        mod_list = [] if mod_list is None else mod_list
+
+        if isinstance(mod_list, basestring):
+            mod_list = [mod_list]
+
+        mod_list.insert(0,self.base_key)
+
+        debug("Looking for %s in %s..." % (part_key, ','.join(mod_list)))
+
+        for mod_key in mod_list:
+            if mod_key not in self.mods:
+                error('Mod not found!')
+                continue
+
+            mod = self.mods[mod_key]
+            part = mod.parts.getPart(part_key)
+            if part is not None:
+                debug("Found part: %s" % (str(part)))
+                return part
+
+        raise KeyError, 'Part not found!'
+
+    def getSprites(self):
+        part_list = {}
+        for mod in self.mods:
+            part_list.update(self.mods[mod].sprites.get_dict())
+        return part_list
+
+    # Backwards compat for use as PartsBin
+    def __getitem__(self, key):
+        return self.getPart(key, self.getMods())
+
+class Mod:
+    def __init__(self, modfile = None):
+        self.parts = None
+        self.sprites = None
+
+        if(modfile):
+            self.loadModFile(modfile)
+
+    def loadPartsFile(self, xmlfile):
+        self.parts = PartsBin(xmlfile)
+
+    def loadSpriteMap(self, xmlfile):
+        self.sprites = SpriteMap(xmlfile)
+
+    def loadModFile(self, modfile):
+        pass
 
 class Ship:
     maxdepth = 100
@@ -320,15 +410,3 @@ class ShipPart:
 
     def __getitem__(self, key):
         return self.elem.get(key)
-
-class SpriteMap:
-    def __init__(self, xmlfile):
-        sprite_xml = ET.ElementTree()
-        sprite_xml.parse(xmlfile)
-        self.sprite_list = {}
-
-        for sprite in sprite_xml.findall('./sprite'):
-            self.sprite_list[sprite.get('n').lower()] = sprite.attrib
-
-    def get_dict(self):
-        return self.sprite_list
