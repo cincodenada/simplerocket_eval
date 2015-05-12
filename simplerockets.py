@@ -12,7 +12,6 @@ traceback_depth = None
 class PartsBin:
     def __init__(self, xmlfile):
         self.part_dict = {}
-        self.fuel_mass_per_liter = 0.002
 
         #Parse the PartsList XML
         self.tree = ET.ElementTree()
@@ -275,7 +274,7 @@ class ShipPart:
         if(tank is None):
             return 0
         else:
-            return float(tank.get('fuel'))*self.partsbin.fuel_mass_per_liter
+            return self.get_mass() - tank.get('dryMass')
 
     def is_poly(self):
         return (self.elem.find('Shape') is not None)
