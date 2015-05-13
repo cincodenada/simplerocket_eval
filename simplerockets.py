@@ -13,8 +13,9 @@ ship_url = 'http://jundroo.com/service/SimpleRockets/DownloadRocket?id=%d'
 traceback_depth = None 
 
 class PartsBin:
-    def __init__(self, xmlfile):
+    def __init__(self, xmlfile, name = None):
         self.part_dict = {}
+        self.name = name
 
         #Parse the PartsList XML
         self.tree = ET.ElementTree()
@@ -54,6 +55,7 @@ class AssetBin:
         self.mods = OrderedDict()
 
         base_mod = Mod()
+        base_mod.name = self.base_key
         base_mod.loadPartsFile(partsfile)
         base_mod.loadSpriteMap(spritemap)
 
@@ -95,7 +97,9 @@ class AssetBin:
     def getSprites(self):
         part_list = {}
         for mod in self.mods:
+            debug('Adding sprites from %s...' % (mod))
             part_list.update(self.mods[mod].sprites.get_dict())
+            print self.mods[mod].sprites.get_dict()
         return part_list
 
     # Backwards compat for use as PartsBin
@@ -116,7 +120,7 @@ class Mod:
             self.loadModFile(modfile)
 
     def loadPartsFile(self, xmlfile):
-        self.parts = PartsBin(xmlfile)
+        self.parts = PartsBin(xmlfile, self.name)
 
     def loadSpriteMap(self, xmlfile):
         self.sprites = SpriteMap(xmlfile)
@@ -124,7 +128,9 @@ class Mod:
     def loadModFile(self, modfile):
         # Extract it if we haven't
         (filename, ext) = os.path.basename(modfile).rsplit('.')
-        modpath = os.path.join(self.mods_dir, filename)
+        self.name = filename
+
+        modpath = os.path.join(self.mods_dir, self.name)
         if not os.path.isdir(modpath):
             self.extractMod(modfile, modpath)
 
@@ -445,6 +451,7 @@ class ShipPart:
             'size': self.get_size(),
             'shape': shape,
             'actual_size': self.get_actual_size(shape),
+            'mod': self.partsbin.name
         })
         return data
 

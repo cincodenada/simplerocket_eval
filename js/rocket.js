@@ -1,3 +1,4 @@
+var img_base = 'http://proj.this.com/RocketCenter/mods/';
 /* 
  * Rocket 
  */
@@ -413,6 +414,16 @@ function Part(rocket, idx) {
 
     //Pull in our sprite data
     this.spritedata = this.rocket.spritemap[this.data.sprite.toLowerCase()];
+    if(this.spritedata) {
+        //Scale image down
+        aspect = Math.max(this.spritedata.w/this.data.actual_size[0], this.spritedata.h/this.data.actual_size[1])
+        this.spritesize = [this.spritedata.w/aspect,this.spritedata.h/aspect];
+    } else {
+        //Load image file directly
+        this.spritesize = this.data.actual_size;
+        this.sprite = new Image();
+        this.sprite.src = img_base + this.data.mod + '/' + this.data.sprite;
+    }
 }
 
 Part.prototype.get_stage = function() {
@@ -505,16 +516,28 @@ Part.prototype.draw = function(with_centroid) {
 
     switch(this.rocket.drawmode) {
     case 'sprites':
-        //Scale image down
-        aspect = Math.max(this.spritedata.w/this.data.actual_size[0], this.spritedata.h/this.data.actual_size[1])
-        spritesize = [this.spritedata.w/aspect,this.spritedata.h/aspect];
         //Draw sprite
         this.dc.gt().save()
         this.dc.gt().rotate(Math.PI);
-        this.dc.drawImage(this.rocket.sprite, 
-            this.spritedata.x, this.spritedata.y, this.spritedata.w, this.spritedata.h,
-            -spritesize[0]/2, -spritesize[1]/2, spritesize[0], spritesize[1]
-        );
+        if(this.spritedata) {
+            this.dc.drawImage(this.rocket.sprite,
+                this.spritedata.x, this.spritedata.y, this.spritedata.w, this.spritedata.h,
+                -this.spritesize[0]/2, -this.spritesize[1]/2, this.spritesize[0], this.spritesize[1]
+            );
+        } else {
+            var me = this;
+            var do_draw = function() {
+                me.dc.drawImage(me.sprite, 
+                    -me.spritesize[0]/2, -me.spritesize[1]/2,
+                    me.spritesize[0], me.spritesize[1]
+                );
+            };
+            if(this.sprite.complete) {
+                do_draw();
+            } else {
+                this.sprite.onload = do_draw;
+            }
+        }
         this.dc.gt().restore()
         break;
     default:
