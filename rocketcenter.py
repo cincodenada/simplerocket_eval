@@ -3,6 +3,7 @@ import json
 import simplerockets as sr
 import os
 import logging
+from glob import glob
 
 demo_id = 119304
 
@@ -57,6 +58,11 @@ def server_static(type, filename, subdir = ''):
 def get_app():
     return default_app()
 
+try:
+    logging.basicConfig(filename='rocketcenter.log',level=logging.DEBUG)
+except Exception, e:
+    pass
+
 if(os.path.dirname(__file__)):
     os.chdir(os.path.dirname(__file__))
 
@@ -65,10 +71,9 @@ ship_assets = sr.AssetBin(
     'img/sprites/ShipSprites.xml'
 )
 
-try:
-    logging.basicConfig(filename='rocketcenter.log',level=logging.INFO)
-except Exception, e:
-    pass
+# Load mods
+for modfile in glob('mods/*.srmod'):
+    ship_assets.addModfile(modfile)
 
 if __name__ == "__main__":
     run(host='localhost',port=54321,reloader=True)

@@ -3,9 +3,11 @@ from polyfunc import SimplePoly
 import requests
 import sys, traceback
 import os
+import re
 import logging
 from logging import debug, info, warning, error, critical
 from collections import OrderedDict
+from zipfile import ZipFile
 
 ship_url = 'http://jundroo.com/service/SimpleRockets/DownloadRocket?id=%d'
 traceback_depth = None 
@@ -103,7 +105,12 @@ class AssetBin:
 class Mod:
     def __init__(self, modfile = None):
         self.parts = None
+        self.parts_fn = 'PartList.xml'
         self.sprites = None
+        self.sprites_fn = 'ShipSprites.xml'
+
+        self.mods_dir = 'mods'
+        self.modfile_re = re.compile('^[\w\d\-\s]+\.png$')
 
         if(modfile):
             self.loadModFile(modfile)
@@ -115,7 +122,40 @@ class Mod:
         self.sprites = SpriteMap(xmlfile)
 
     def loadModFile(self, modfile):
-        pass
+        # Extract it if we haven't
+        (filename, ext) = os.path.basename(modfile).rsplit('.')
+        modpath = os.path.join(self.mods_dir, filename)
+        if not os.path.isdir(modpath):
+            self.extractMod(modfile, modpath)
+
+        debug('Loading mod %s from %s...' % (modfile, modpath))
+
+        partsfile = os.path.join(modpath, self.parts_fn)
+        if os.path.exists(partsfile):
+            debug('\tLoading parts...')
+            self.loadPartsFile(partsfile)
+
+        spritesfile = os.path.join(modpath, self.sprites_fn)
+        if os.path.exists(spritesfile):
+            debug('\tLoading sprites...')
+            self.loadSpriteMap(spritesfile)
+
+    def extractMod(self, modfile, modpath):
+        debug('Extracting mod %s into %s...' % (modfile, modpath))
+        modzip = ZipFile(modfile)
+        # Filter files, just in case
+        goodfiles = []
+
+        for fname in modzip.namelist():
+            if fname == self.parts_fn or fname == self.sprites_fn:
+                goodfiles.append(fname)
+            elif self.modfile_re.match(fname):
+                goodfiles.append(fname)
+
+        debug('Extracting %d files...' % (len(goodfiles)))
+                
+        os.mkdir(modpath)
+        modzip.extractall(modpath, goodfiles)
 
 class Ship:
     maxdepth = 100
