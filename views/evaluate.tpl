@@ -6,6 +6,7 @@
 var rocketdata = {{!json.dumps(rocket_data)}};
 var stagedata = {{!json.dumps(stage_data)}};
 var spritedata = {{!json.dumps(sprite_data)}};
+var mod = '{{mod}}';
 var error_info = {{!json.dumps(error_info)}};
 </script>
 <script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>

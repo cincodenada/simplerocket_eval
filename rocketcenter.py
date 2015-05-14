@@ -14,8 +14,19 @@ demo_id = 119304
 @route('/')
 @view('evaluate')
 def evaluate(rocket_id = None):
+    ship_assets = sr.AssetBin(
+        'PartList.xml',
+        'img/sprites/ShipSprites.xml'
+    )
+
+    # Load mods
+    for modfile in glob('mods/*.srmod'):
+        ship_assets.addModfile(modfile)
+
     if(request.query.get('id')):
         rocket_id = int(request.query.get('id'))
+
+    force_mod = request.query.get('mod')
 
     ship = sr.Ship(ship_assets)
     ship.set_cachedir(os.path.join(os.getcwd(),'cache'))
@@ -23,7 +34,7 @@ def evaluate(rocket_id = None):
     if(not rocket_id):
         rocket_id = demo_id
 
-    ship.load(rocket_id)
+    ship.load(rocket_id, force_mod)
 
     if ship.name:
         rocket_name = ship.name
@@ -48,6 +59,7 @@ def evaluate(rocket_id = None):
             'detachers': ship.detacher_list,
         },
         'sprite_data': ship_assets.getSprites(),
+        'mod': ship_assets.active_mod,
     }
 
 @route('/<type:re:(js|css|img|cache)>/<filename>')
@@ -65,15 +77,6 @@ except Exception, e:
 
 if(os.path.dirname(__file__)):
     os.chdir(os.path.dirname(__file__))
-
-ship_assets = sr.AssetBin(
-    'PartList.xml',
-    'img/sprites/ShipSprites.xml'
-)
-
-# Load mods
-for modfile in glob('mods/*.srmod'):
-    ship_assets.addModfile(modfile)
 
 if __name__ == "__main__":
     run(host='localhost',port=54321,reloader=True)

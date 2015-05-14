@@ -60,11 +60,38 @@ class AssetBin:
         base_mod.loadSpriteMap(spritemap)
 
         self.mods[self.base_key] = base_mod
+        self.active_mod = None
+
+    def detectMod(self, parts):
+        modscores = OrderedDict.fromkeys(self.mods.keys(), 0)
+        for p in parts:
+            for m in self.mods:
+                if self.mods[m].parts.getPart(p.get('partType')):
+                    modscores[m]+=1
+
+        print modscores
+        print len(parts)
+        topscore = 0
+        winner = None
+        # Doing this in order favors earlier mods,
+        # which will automatically select the base mod
+        for m in modscores:
+            if modscores[m] > topscore:
+                topscore = modscores[m]
+                winner = m
+        
+        if(topscore < len(parts)):
+            error('Top mod didn\'t have enough parts!')
+
+        return winner
+
+    def selectMod(self, mod_key):
+        self.active_mod = mod_key
 
     def addModfile(self, modfile, title = None):
         if title is None:
-            titlebits = modfile.split('.')
-            title = titlebits[0]
+            # Extract it if we haven't
+            (title, ext) = os.path.basename(modfile).rsplit('.')
 
         self.mods[title] = Mod(modfile)
 
@@ -72,7 +99,11 @@ class AssetBin:
         return self.mods.keys()[1:]
 
     def getPart(self, part_key, mod_list = None):
-        mod_list = [] if mod_list is None else mod_list
+        if mod_list is None:
+            if self.active_mod:
+                mod_list = [self.active_mod]
+            else:
+                mod_list = []
 
         if isinstance(mod_list, basestring):
             mod_list = [mod_list]
@@ -92,19 +123,16 @@ class AssetBin:
                 debug("Found part: %s" % (str(part)))
                 return part
 
-        raise KeyError, 'Part not found!'
+        raise KeyError, 'Part %s not found in %s!' % (part_key, mod_list)
 
     def getSprites(self):
         part_list = {}
-        for mod in self.mods:
-            debug('Adding sprites from %s...' % (mod))
-            part_list.update(self.mods[mod].sprites.get_dict())
-            print self.mods[mod].sprites.get_dict()
-        return part_list
+        source = self.base_key if self.active_mod is None else self.active_mod
+        return self.mods[source].sprites.get_dict()
 
     # Backwards compat for use as PartsBin
     def __getitem__(self, key):
-        return self.getPart(key, self.getMods())
+        return self.getPart(key, self.active_mod)
 
 class Mod:
     def __init__(self, modfile = None):
@@ -183,7 +211,8 @@ class Ship:
     def get_cachepath(self, shipid):
         return os.path.join(self.cache_dir, '%d.xml' % (shipid))
 
-    def load(self, fromwhat):
+    def load(self, fromwhat, force_mod = None):
+        self.partsbin.selectMod(force_mod)
         try:
             try:
                 shipid = int(fromwhat)
@@ -240,6 +269,12 @@ class Ship:
         self.parts = []
         self.tree = tree
         parts = tree.findall('./Parts/Part')
+
+        if self.partsbin.active_mod is None:
+            self.partsbin.selectMod(
+                self.partsbin.detectMod(parts)
+            )
+
         for p in parts:
             newpart = PartInstance(p, self)
             newpart.adjust()
