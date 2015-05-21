@@ -33,7 +33,7 @@ $(document).ready(function() {
         'parts':rocketdata,
         'stages':stagedata,
         'sprites':spritedata,
-        'spriteurl': '/img/sprites/ShipSprites.png'
+        'spriteurl': '/mods/' + mod + '/ShipSprites.png'
     }, ctx);
     rocket.sprite.onload = function() {
         resetview();

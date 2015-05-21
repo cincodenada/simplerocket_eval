@@ -1,4 +1,4 @@
-var img_base = 'http://proj.this.com/RocketCenter/mods/';
+var img_base = '/mods/';
 /* 
  * Rocket 
  */
