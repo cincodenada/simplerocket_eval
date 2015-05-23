@@ -69,8 +69,6 @@ class AssetBin:
                 if self.mods[m].parts.getPart(p.get('partType')):
                     modscores[m]+=1
 
-        print modscores
-        print len(parts)
         topscore = 0
         winner = None
         # Doing this in order favors earlier mods,
@@ -81,7 +79,10 @@ class AssetBin:
                 winner = m
         
         if(topscore < len(parts)):
-            error('Top mod didn\'t have enough parts!')
+            error('Top mod (%s) didn\'t have enough parts!' % (winner))
+            for p in parts:
+                if not self.mods[winner].parts.getPart(p.get('partType'))
+                    error('Missing part %s!' % (p.get('partType')))
 
         return winner
 
