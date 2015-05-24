@@ -11,6 +11,8 @@ from zipfile import ZipFile
 
 ship_url = 'http://jundroo.com/service/SimpleRockets/DownloadRocket?id=%d'
 traceback_depth = None 
+#Fucking namespaces...
+nsmap = {'sr': 'http://jundroo.com/simplerockets/partlist.xsd'}
 
 class PartsBin:
     def __init__(self, xmlfile, name = None):
@@ -21,8 +23,7 @@ class PartsBin:
         self.tree = ET.ElementTree()
         self.tree.parse(xmlfile)
 
-        #Fucking namespaces...
-        for part in self.tree.findall('./*'):
+        for part in self.tree.findall('./sr:PartType', nsmap):
             self.part_dict[part.get('id')] = ShipPart(part, self)
 
     def getShip(self):
@@ -442,17 +443,17 @@ class ShipPart:
         return (float(self.elem.get('width')),float(self.elem.get('height')))
 
     def get_fuel_mass(self):
-        tank = self.elem.find('Tank')
+        tank = self.elem.find('sr:Tank', nsmap)
         if(tank is None):
             return 0
         else:
             return self.get_mass() - float(tank.get('dryMass'))
 
     def is_poly(self):
-        return (self.elem.find('Shape') is not None)
+        return (self.elem.find('sr:Shape', nsmap) is not None)
 
     def get_shape(self):
-        shape = self.elem.find('Shape')
+        shape = self.elem.find('sr:Shape', nsmap)
         if(shape is None):
             halfsize = tuple(x/2 for x in self.get_size())
             return (
@@ -464,7 +465,7 @@ class ShipPart:
         else:
             return tuple(
                 (float(v.get('x')),float(v.get('y')))
-                for v in shape.findall('./Vertex')
+                for v in shape.findall('./sr:Vertex', nsmap)
             )
 
     def get_actual_size(self, shape):
