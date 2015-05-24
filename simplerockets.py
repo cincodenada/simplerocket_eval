@@ -55,10 +55,9 @@ class AssetBin:
         self.base_key = 'base'
         self.mods = OrderedDict()
 
-        base_mod = Mod()
-        base_mod.name = self.base_key
-        base_mod.loadPartsFile(partsfile)
-        base_mod.loadSpriteMap(spritemap)
+        # It checks for the directory first,
+        # so base.srmod doesn't have to be there
+        base_mod = Mod(self.base_key + '.srmod')
 
         self.mods[self.base_key] = base_mod
         self.active_mod = None
