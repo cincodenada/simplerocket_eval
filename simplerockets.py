@@ -109,7 +109,8 @@ class AssetBin:
         if isinstance(mod_list, basestring):
             mod_list = [mod_list]
 
-        mod_list.insert(0,self.base_key)
+        # Base mod as backup
+        mod_list.append(self.base_key)
 
         debug("Looking for %s in %s..." % (part_key, ','.join(mod_list)))
 
