@@ -51,7 +51,7 @@ class SpriteMap:
         return self.sprite_list
 
 class AssetBin:
-    def __init__(self, partsfile, spritemap):
+    def __init__(self):
         self.base_key = 'base'
         self.mods = OrderedDict()
 
@@ -128,7 +128,9 @@ class AssetBin:
 
     def getSprites(self):
         part_list = {}
-        source = self.base_key if self.active_mod is None else self.active_mod
+        source = self.active_mod
+        if self.active_mod is None or self.mods[self.active_mod].sprites is None:
+            source = self.base_key
         return self.mods[source].sprites.get_dict()
 
     # Backwards compat for use as PartsBin

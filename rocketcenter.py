@@ -14,10 +14,7 @@ demo_id = 119304
 @route('/')
 @view('evaluate')
 def evaluate(rocket_id = None):
-    ship_assets = sr.AssetBin(
-        'PartList.xml',
-        'img/sprites/ShipSprites.xml'
-    )
+    ship_assets = sr.AssetBin()
 
     # Load mods
     for modfile in glob('mods/*.srmod'):
