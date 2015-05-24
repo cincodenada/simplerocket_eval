@@ -435,7 +435,7 @@ class ShipPart:
             return self.centroid
         else:
             if(self.is_poly()):
-                poly = SimplePoly(self.get_shape())
+                poly = self.get_shape()
                 return poly.centroid()
             else:
                 return (0,0)
@@ -458,49 +458,33 @@ class ShipPart:
         return (self.elem.find('sr:Shape', nsmap) is not None)
 
     def get_shape(self):
-        shape = self.elem.find('sr:Shape', nsmap)
-        if(shape is None):
-            halfsize = tuple(x/2 for x in self.get_size())
-            return (
-                (halfsize[0],halfsize[1]),
-                (-halfsize[0],halfsize[1]),
-                (-halfsize[0],-halfsize[1]),
-                (halfsize[0],-halfsize[1])
-            )
-        else:
-            vertices = []
-            max_x = min_x = max_y = min_y = None
-            for v in shape.findall('./sr:Vertex', nsmap):
-                x = float(v.get('x'))
-                y = float(v.get('y'))
-                if(max_x is None or x > max_x):
-                    max_x = x
-                if(max_y is None or y > max_y):
-                    max_y = y
-                if(min_x is None or x < min_x):
-                    min_x = x
-                if(min_y is None or y < min_y):
-                    min_y = y
-                vertices.append((x,y))
+        if(not hasattr(self, 'shape')):
+            vertlist = self.elem.find('sr:Shape', nsmap)
+            if(vertlist is None):
+                halfsize = tuple(x/2 for x in self.get_size())
+                self.shape = SimplePoly((
+                    (halfsize[0],halfsize[1]),
+                    (-halfsize[0],halfsize[1]),
+                    (-halfsize[0],-halfsize[1]),
+                    (halfsize[0],-halfsize[1])
+                ))
+            else:
+                self.shape = SimplePoly([
+                    (float(v.get('x')), float(v.get('y')))
+                    for v in vertlist.findall('./sr:Vertex', nsmap)
+                ])
 
-            # Shrink oversized shapes
-            width = max_x - min_x;
-            height = max_y - min_y;
-            (pwidth, pheight) = self.get_size()
-            if(width > pwidth or height > pheight):
-                factor = max(pwidth/width, pheight/height)
-                vertices = [(x*factor, y*factor) for (x,y) in vertices]
+                # Shrink oversized shapes
+                size = self.shape.size()
+                psize = self.get_size()
+                if(size[0] > psize[0] or size[1] > psize[1]):
+                    factor = max(psize[0]/size[0], psize[1]/size[1])
+                    self.shape.scale(factor)
 
-            return vertices
+        return self.shape
 
     def get_actual_size(self, shape):
-        maxx = maxy = 0
-        for curpoint in shape:
-            if(abs(curpoint[0]) > maxx):
-                maxx = abs(curpoint[0])
-            if(abs(curpoint[1]) > maxy):
-                maxy = abs(curpoint[1])
-        return (maxx*2,maxy*2)
+        return self.shape.size()
 
 
     def get_dict(self):
@@ -511,7 +495,7 @@ class ShipPart:
             'mass': self.get_mass(),
             'fuel_mass': self.get_fuel_mass(),
             'size': self.get_size(),
-            'shape': shape,
+            'shape': shape.get_points(),
             'actual_size': self.get_actual_size(shape),
             'mod': self.partsbin.name
         })
