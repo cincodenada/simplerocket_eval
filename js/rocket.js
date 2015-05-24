@@ -416,7 +416,7 @@ function Part(rocket, idx) {
     this.spritedata = this.rocket.spritemap[this.data.sprite.toLowerCase()];
     if(this.spritedata) {
         //Scale image down
-        aspect = Math.max(this.spritedata.w/this.data.actual_size[0], this.spritedata.h/this.data.actual_size[1])
+        aspect = Math.min(this.spritedata.w/this.data.actual_size[0], this.spritedata.h/this.data.actual_size[1])
         this.spritesize = [this.spritedata.w/aspect,this.spritedata.h/aspect];
     } else {
         //Load image file directly
@@ -599,9 +599,9 @@ Part.prototype.draw = function(with_centroid) {
 
 Part.prototype.draw_path = function() {
     this.dc.beginPath()
-    this.dc.moveTo(this.data.shape[0][0], this.data.shape[0][1]);
+    this.dc.moveTo(-this.data.shape[0][0], this.data.shape[0][1]);
     for(var i=1;i<this.data.shape.length;i++) {
-        this.dc.lineTo(this.data.shape[i][0], this.data.shape[i][1]);
+        this.dc.lineTo(-this.data.shape[i][0], this.data.shape[i][1]);
     }
     this.dc.closePath();
 }

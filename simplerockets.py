@@ -468,10 +468,30 @@ class ShipPart:
                 (halfsize[0],-halfsize[1])
             )
         else:
-            return tuple(
-                (float(v.get('x')),float(v.get('y')))
-                for v in shape.findall('./sr:Vertex', nsmap)
-            )
+            vertices = []
+            max_x = min_x = max_y = min_y = None
+            for v in shape.findall('./sr:Vertex', nsmap):
+                x = float(v.get('x'))
+                y = float(v.get('y'))
+                if(max_x is None or x > max_x):
+                    max_x = x
+                if(max_y is None or y > max_y):
+                    max_y = y
+                if(min_x is None or x < min_x):
+                    min_x = x
+                if(min_y is None or y < min_y):
+                    min_y = y
+                vertices.append((x,y))
+
+            # Shrink oversized shapes
+            width = max_x - min_x;
+            height = max_y - min_y;
+            (pwidth, pheight) = self.get_size()
+            if(width > pwidth or height > pheight):
+                factor = max(pwidth/width, pheight/height)
+                vertices = [(x*factor, y*factor) for (x,y) in vertices]
+
+            return vertices
 
     def get_actual_size(self, shape):
         maxx = maxy = 0
