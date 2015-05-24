@@ -31,6 +31,9 @@ var error_info = {{!json.dumps(error_info)}};
     <span style="float: right">
         Showing
         {{rocket_name}}
+        % if mod != 'base':
+        | Mod: {{mod}}
+        % end
         | <a href="http://jundroo.com/ViewShip.html?id={{rocket_id}}" target="_blank">Download</a>
     </span>
     <br/>
