@@ -56,6 +56,7 @@ def evaluate(rocket_id = None):
             'detachers': ship.detacher_list,
         },
         'sprite_data': ship_assets.getSprites(),
+        'sprite_mod': ship_assets.active_mod if ship_assets.hasSpriteMap() else ship_assets.base_key,
         'mod': ship_assets.active_mod,
     }
 

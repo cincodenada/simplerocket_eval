@@ -128,10 +128,13 @@ class AssetBin:
 
     def getSprites(self):
         part_list = {}
-        source = self.active_mod
-        if self.active_mod is None or self.mods[self.active_mod].sprites is None:
-            source = self.base_key
-        return self.mods[source].sprites.get_dict()
+        if self.hasSpriteMap():
+            return self.mods[self.active_mod].sprites.get_dict()
+        else:
+            return self.mods[self.base_key].sprites.get_dict()
+    
+    def hasSpriteMap(self):
+        return not (self.active_mod is None or self.mods[self.active_mod].sprites is None)
 
     # Backwards compat for use as PartsBin
     def __getitem__(self, key):
