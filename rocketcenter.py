@@ -62,8 +62,8 @@ def evaluate(rocket_id = None):
         'mod': ship_assets.active_mod,
     }
 
-@route('/<type:re:(js|css|img|cache)>/<filename>')
-@route('/<type:re:(js|css|img|cache)>/<subdir:path>/<filename>')
+@route('/<type:re:(js|css|img|cache|mods)>/<filename>')
+@route('/<type:re:(js|css|img|cache|mods)>/<subdir:path>/<filename>')
 def server_static(type, filename, subdir = ''):
     return static_file(os.path.join(type, subdir, filename),'./')
 
