@@ -418,10 +418,17 @@ class PartInstance:
         return self.elem.get(key)
 
     def adjust(self):
-        #Flip lander struts for display
-        if(self.part['type'] in ('lander')):
-            if((self.parent is not None) and int(self.parent.get('childAttachPoint')) == 1):
-                self.elem.set('flippedX',1-int(self['flippedX']))
+        #Flip flippable parts for display
+        if(self.parent is not None):
+            ap_num = int(self.parent.get('childAttachPoint'))
+            ap = self.part.get_attach_point(ap_num)
+            doflip = (ap and ap['flipX'])
+            # Special case for lander parts
+            # Which seem to have an implicit flipX
+            if(ap_num == 1 and self.part['type'] in ('lander')):
+                doflip = True
+            if(doflip):
+                self.elem.set('flippedX',1)
 
 class ShipPart:
     centroid = None
@@ -485,6 +492,13 @@ class ShipPart:
 
     def get_actual_size(self, shape):
         return self.shape.size()
+
+    def get_attach_point(self, index):
+        aplist = self.elem.findall('sr:AttachPoints/sr:AttachPoint', nsmap)
+        if index in aplist:
+            return aplist[index]
+        else:
+            return None
 
 
     def get_dict(self):
