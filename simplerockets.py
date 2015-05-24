@@ -81,7 +81,7 @@ class AssetBin:
         if(topscore < len(parts)):
             error('Top mod (%s) didn\'t have enough parts!' % (winner))
             for p in parts:
-                if not self.mods[winner].parts.getPart(p.get('partType'))
+                if self.mods[winner].parts.getPart(p.get('partType')) is None:
                     error('Missing part %s!' % (p.get('partType')))
 
         return winner
@@ -446,7 +446,7 @@ class ShipPart:
         if(tank is None):
             return 0
         else:
-            return self.get_mass() - tank.get('dryMass')
+            return self.get_mass() - float(tank.get('dryMass'))
 
     def is_poly(self):
         return (self.elem.find('Shape') is not None)

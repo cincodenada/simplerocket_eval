@@ -320,8 +320,8 @@ Rocket.prototype.deltaV = function(stage) {
         }
         for(var idx in this.parts) {
             part = this.parts[idx];
+            var curmass = part.get_mass();
             for(var s=0;s<=part.stage;s++) {
-                var curmass = part.get_mass();
                 stage_masses[s] += curmass;
                 final_masses[s] += curmass;
             }
