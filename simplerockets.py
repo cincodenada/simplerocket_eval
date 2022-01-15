@@ -106,7 +106,7 @@ class AssetBin:
             else:
                 mod_list = []
 
-        if isinstance(mod_list, basestring):
+        if isinstance(mod_list, str):
             mod_list = [mod_list]
 
         # Base mod as backup
@@ -406,7 +406,7 @@ class PartInstance:
     def get_dict(self):
         retdict = self.part.get_dict()
         retdict.update({k: float(v)
-            for k, v in self.elem.attrib.iteritems()
+            for k, v in self.elem.attrib.items()
             if k in ('x','y','editorAngle','flippedX','flippedY','id')
         })
         return retdict
@@ -503,7 +503,7 @@ class ShipPart:
 
     def get_dict(self):
         shape = self.get_shape();
-        data = {k: v for k, v in self.elem.attrib.iteritems() if k not in('id')};
+        data = {k: v for k, v in self.elem.attrib.items() if k not in('id')};
         data.update({
             'centroid': self.get_centroid(),
             'mass': self.get_mass(),
