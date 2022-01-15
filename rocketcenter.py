@@ -65,17 +65,15 @@ def evaluate(rocket_id = None):
 def server_static(type, filename, subdir = ''):
     return static_file(os.path.join(type, subdir, filename),'./')
 
-def get_app():
-    return default_app()
-
 if(os.path.dirname(__file__)):
     os.chdir(os.path.dirname(__file__))
 
 try:
-    logging.basicConfig(filename='rocketcenter.log',level=logging.DEBUG)
-except Exception, e:
+    logging.basicConfig(filename='rocketcenter.log',level=logging.INFO)
+except Exception as e:
     pass
 
+application = default_app()
 
 if __name__ == "__main__":
     run(host='localhost',port=54321,reloader=True)

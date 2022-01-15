@@ -125,7 +125,7 @@ class AssetBin:
                 debug("Found part: %s" % (str(part)))
                 return part
 
-        raise KeyError, 'Part %s not found in %s!' % (part_key, mod_list)
+        raise KeyError('Part %s not found in %s!' % (part_key, mod_list))
 
     def getSprites(self):
         part_list = {}
@@ -234,7 +234,7 @@ class Ship:
             except ValueError:
                 self.loadFile(fromwhat)
 
-        except (ET.ParseError, IOError), e:
+        except (ET.ParseError, IOError) as e:
             self.error_type = "FileLoad"
             self.error = "Error loading file: " + str(e)
             return False
@@ -246,7 +246,7 @@ class Ship:
             self.error_type = "FileParse"
             self.error = "Ran out of memory loading your ship.  This is likely because you have lots of stages/detachers, and my parser isn't very good at that yet.  Sorry - I'm working on it!"
             return False
-        except Exception, e:
+        except Exception as e:
             self.error_type = "Unknown"
             self.error = "Unknown error loading ship file.  Get me a ship ID and I can look through my error logs.  Details: " + str(e)
             etyp, eval, etb = sys.exc_info()
@@ -323,7 +323,7 @@ class Ship:
             pod_id = pod.get('id')
             self.name = pod.find("./Pod").get('name')
         except:
-            raise KeyError, 'Pod not found!'
+            raise KeyError('Pod not found!')
         findresult = [[],[]]
 
         stage_parts = []
